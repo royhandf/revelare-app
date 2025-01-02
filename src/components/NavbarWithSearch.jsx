@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import SearchBar from "./SearchBar";
 import Modal from "./Modal";
 import Button from "./Button";
@@ -28,7 +27,7 @@ const NavbarWithSearch = ({
   return (
     <nav className="bg-white py-4 px-6 shadow-sm">
       <div className="max-w-screen-xl flex items-center justify-between mx-auto p-2 gap-3">
-        <Link to="/" className="flex items-center space-x-3">
+        <a href="/" className="flex items-center space-x-3">
           <img
             className="w-8 h-8"
             src="/images/book.png"
@@ -37,7 +36,7 @@ const NavbarWithSearch = ({
             height="32"
           />
           <span className="text-2xl font-semibold">Revelare</span>
-        </Link>
+        </a>
         <SearchBar
           onSearch={onSearch}
           searchQuery={searchQuery}

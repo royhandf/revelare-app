@@ -98,6 +98,8 @@ function BookDetail() {
     setAuthenticated(false);
     setCurrentUser(null);
     setDropdownMenuOpen(false);
+
+    window.location.reload();
   };
 
   const handleSearch = (e) => {

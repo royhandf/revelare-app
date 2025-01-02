@@ -78,6 +78,8 @@ const Home = () => {
     setAuthenticated(false);
     setCurrentUser(null);
     setDropdownMenuOpen(false);
+
+    window.location.reload();
   };
 
   return (

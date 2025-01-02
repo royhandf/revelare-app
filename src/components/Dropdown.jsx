@@ -11,7 +11,7 @@ const Dropdown = ({ onSignOut }) => {
           <DropdownItem to="/dashboard/books">Dashboard</DropdownItem>
         )}
         <DropdownItem to="/bookmark">Bookmark</DropdownItem>
-        <DropdownItem to="/" onClick={onSignOut}>
+        <DropdownItem to="#" onClick={onSignOut}>
           Log out
         </DropdownItem>
       </ul>

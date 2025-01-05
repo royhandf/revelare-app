@@ -1,6 +1,6 @@
 import React from "react";
 
-const Error = () => {
+const Unauthorized = () => {
   const handleClick = () => {
     window.location.href = "/";
   };
@@ -29,4 +29,4 @@ const Error = () => {
   );
 };
 
-export default Error;
+export default Unauthorized;

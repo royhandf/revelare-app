@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 
 const Breadcrumb = ({ item }) => {
   return (
@@ -8,12 +7,12 @@ const Breadcrumb = ({ item }) => {
         <nav className="flex" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 md:space-x-2">
             <li className="inline-flex items-center">
-              <Link
-                to="/"
+              <a
+                href="/"
                 className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-violet-600"
               >
                 Home
-              </Link>
+              </a>
             </li>
             <li aria-current="page">
               <div className="flex items-center">

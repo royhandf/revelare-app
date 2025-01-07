@@ -74,7 +74,7 @@ export async function signin(email, password) {
   }
 }
 
-export async function getData(page = 1) {
+export async function getData() {
   try {
     const token = localStorage.getItem("token");
 
@@ -84,14 +84,11 @@ export async function getData(page = 1) {
       throw new Error("Unauthorized");
     }
 
-    const response = await axios.get(
-      `${config.api_host}/dashboard/books?page=${page}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await axios.get(`${config.api_host}/dashboard/books`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (response.data.status === "success") {
       return response.data;
@@ -114,7 +111,7 @@ export async function addBook(data) {
     }
 
     const response = await axios.post(
-      `${config.api_host}/dashboard/book/create`,
+      `${config.api_host}/dashboard/books/create`,
       data,
       {
         headers: {
@@ -137,6 +134,65 @@ export async function addBook(data) {
   }
 }
 
+export async function updateBook(id, data) {
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      throw new Error("Unauthorized");
+    }
+
+    const response = await axios.put(
+      `${config.api_host}/dashboard/books/edit/${id}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.data.status === "success") {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to update book");
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getBookForEdit(id) {
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      throw new Error("Unauthorized");
+    }
+
+    const response = await axios.get(
+      `${config.api_host}/dashboard/books/edit/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.data.status === "success") {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to fetch book data");
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function deleteBook(id) {
   try {
     const token = localStorage.getItem("token");
@@ -148,7 +204,7 @@ export async function deleteBook(id) {
     }
 
     const response = await axios.delete(
-      `${config.api_host}/dashboard/book/delete/${id}`,
+      `${config.api_host}/dashboard/books/delete/${id}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

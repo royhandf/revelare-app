@@ -6,8 +6,8 @@ import Unauthorized from "../pages/error/Unauthorized";
 import Index from "../pages/dashboard/Index";
 import Create from "../pages/dashboard/Create";
 import Edit from "../pages/dashboard/Edit";
-import RequireAuth from "./RequireAuth";
 import NotFound from "../pages/error/NotFound";
+import DashboardLayout from "../components/DashboardLayout";
 
 export function AppRoutes() {
   return (
@@ -16,18 +16,13 @@ export function AppRoutes() {
       <Route path="/books" element={<BookLists />} />
       <Route path="/books/:id" element={<BookDetail />} />
 
-      <Route
-        path="/dashboard/books"
-        element={<RequireAuth element={<Index />} roles={["admin"]} />}
-      />
-      <Route
-        path="/dashboard/books/create"
-        element={<RequireAuth element={<Create />} roles={["admin"]} />}
-      />
-      <Route
-        path="/dashboard/books/edit/:id"
-        element={<RequireAuth element={<Edit />} roles={["admin"]} />}
-      />
+      <Route path="/dashboard" element={<DashboardLayout />}>
+        <Route path="books">
+          <Route index element={<Index />} />
+          <Route path="create" element={<Create />} />
+          <Route path="edit/:id" element={<Edit />} />
+        </Route>
+      </Route>
 
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="*" element={<NotFound />} />

@@ -1,18 +1,27 @@
 import ReactPaginate from "react-paginate";
 
 export default function Pagination({
-  totalPages,
-  currentPage,
+  totalPages = 0,
+  currentPage = 1,
   handlePageClick,
 }) {
+  if (totalPages <= 1) {
+    return null;
+  }
+
+  const normalizedCurrentPage = Math.max(
+    0,
+    Math.min(currentPage - 1, totalPages - 1)
+  );
+
   return (
     <ReactPaginate
       previousLabel={"<"}
       nextLabel={">"}
       breakLabel={"..."}
-      pageCount={totalPages}
+      pageCount={Math.max(1, totalPages)}
       onPageChange={handlePageClick}
-      forcePage={currentPage - 1}
+      forcePage={normalizedCurrentPage}
       containerClassName="flex justify-center -space-x-px h-8 text-sm"
       pageClassName="flex items-center px-3 h-8 leading-tight text-gray-500 border border-gray-300 hover:bg-gray-100"
       activeClassName="z-10 text-violet-700 border border-violet-400 bg-violet-100 hover:bg-violet-100"

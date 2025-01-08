@@ -14,7 +14,7 @@ const Index = () => {
   const [totalResults, setTotalResults] = useState(0);
   const [error, setError] = useState(null);
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(totalResults / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(totalResults / itemsPerPage));
 
   useEffect(() => {
     const fetchBooks = async () => {

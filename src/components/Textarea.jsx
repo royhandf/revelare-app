@@ -15,11 +15,10 @@ function Textarea({ label, name, placeholder, value, required, onChange }) {
         placeholder={placeholder}
         required={required}
         onChange={onChange}
+        value={value}
         className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-violet-500"
         rows="8"
-      >
-        {value}
-      </textarea>
+      ></textarea>
     </div>
   );
 }

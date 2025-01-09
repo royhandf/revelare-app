@@ -13,28 +13,48 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const itemsPerPage = 10;
   const totalPages = Math.max(1, Math.ceil(totalResults / itemsPerPage));
 
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const result = await getData();
-        setBooks(result.data);
-        setTotalResults(result.data.length);
+  const fetchBooks = async () => {
+    try {
+      const result = await getData();
+      let filteredBooks = result.data;
 
-        if (result.data.length === 0 && currentPage > 1) {
-          setCurrentPage(1);
-        }
-      } catch (error) {
-        setError(error.message || "Failed to fetch books.");
+      if (searchQuery) {
+        filteredBooks = result.data.filter(
+          (book) =>
+            (book.title?.toLowerCase() || "").includes(
+              searchQuery.toLowerCase()
+            ) ||
+            (book.author?.toLowerCase() || "").includes(
+              searchQuery.toLowerCase()
+            ) ||
+            (book.editor?.toLowerCase() || "").includes(
+              searchQuery.toLowerCase()
+            )
+        );
       }
-    };
+      setBooks(filteredBooks);
+      setTotalResults(filteredBooks.length);
 
+      if (filteredBooks.length === 0 && currentPage > 1) {
+        setCurrentPage(1);
+      }
+    } catch (error) {
+      setError(error.message || "Failed to fetch books.");
+    }
+  };
+
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  useEffect(() => {
     fetchBooks();
-
     window.scrollTo(0, 0);
-  }, [currentPage]);
+  }, [currentPage, searchQuery]);
 
   const handlePageClick = (event) => {
     const selectedPage = event.selected + 1;
@@ -104,6 +124,8 @@ const Index = () => {
                 id="table-search"
                 className="block py-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-indigo-600 focus:border-transparent"
                 placeholder="Search by title, author, or editor"
+                value={searchQuery}
+                onChange={handleSearch}
               />
             </div>
           </div>

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getData, deleteBook } from "../../utils/fetch";
 import BookTable from "./BookTable";
 import { IoIosSearch } from "react-icons/io";
 import Swal from "sweetalert2";
 import Pagination from "../../components/Pagination";
+import debounce from "lodash.debounce";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -47,13 +48,24 @@ const Index = () => {
     }
   };
 
-  const handleSearch = (event) => {
-    setSearchQuery(event.target.value);
+  const handleSearch = useCallback(
+    debounce((query) => {
+      setSearchQuery(query);
+    }, 300),
+    []
+  );
+
+  const onSearchChange = (event) => {
+    handleSearch(event.target.value);
   };
 
   useEffect(() => {
     fetchBooks();
     window.scrollTo(0, 0);
+
+    return () => {
+      handleSearch.cancel();
+    };
   }, [currentPage, searchQuery]);
 
   const handlePageClick = (event) => {
@@ -124,8 +136,7 @@ const Index = () => {
                 id="table-search"
                 className="block py-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-indigo-600 focus:border-transparent"
                 placeholder="Search by title, author, or editor"
-                value={searchQuery}
-                onChange={handleSearch}
+                onChange={onSearchChange}
               />
             </div>
           </div>

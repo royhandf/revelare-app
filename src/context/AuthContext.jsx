@@ -1,3 +1,4 @@
+import { jwtDecode } from "jwt-decode";
 import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
@@ -12,8 +13,21 @@ export const AuthProvider = ({ children }) => {
     const user = JSON.parse(localStorage.getItem("user"));
 
     if (token && user) {
-      setAuthenticated(true);
-      setCurrentUser(user);
+      try {
+        const decodedToken = jwtDecode(token);
+        const currentTime = Date.now() / 1000;
+
+        if (decodedToken.exp < currentTime) {
+          handleLogout();
+          return;
+        }
+
+        setAuthenticated(true);
+        setCurrentUser(user);
+      } catch (error) {
+        console.error("Invalid token", error);
+        handleLogout();
+      }
     }
     setIsLoading(false);
   }, []);

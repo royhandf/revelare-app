@@ -35,10 +35,11 @@ export default function TableBody({
           <td>{item.published}</td>
           <td>
             <Button
-              text="Detail"
               className="block text-violet-600 hover:underline"
               onClick={() => toggleDetailModal(item)}
-            />
+            >
+              Detail
+            </Button>
           </td>
           <td>
             <a
@@ -59,10 +60,11 @@ export default function TableBody({
                 <FiEdit />
               </Link>
               <Button
-                text={<FiTrash2 />}
                 className="text-white bg-red-600 hover:bg-red-700 focus:outline-none rounded-lg text-xs p-2"
                 onClick={() => onDelete(item.id)}
-              />
+              >
+                <FiTrash2 />
+              </Button>
             </div>
           </td>
         </tr>

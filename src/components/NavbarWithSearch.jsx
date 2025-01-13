@@ -44,7 +44,7 @@ const NavbarWithSearch = ({
         />
         {isAuthenticated ? (
           <div className="relative inline-block">
-            <button
+            <Button
               onClick={toggleDropdownMenu}
               className="flex items-center text-sm pe-1 font-medium text-gray-900 rounded-full"
             >
@@ -69,22 +69,24 @@ const NavbarWithSearch = ({
                   d="m1 1 4 4 4-4"
                 />
               </svg>
-            </button>
+            </Button>
             {isDropdownMenuOpen && <Dropdown onSignOut={handleLogout} />}
           </div>
         ) : (
           <div className="space-x-4">
             <Button
               onClick={toggleSignUpModal}
-              text="Sign Up"
               className="bg-transparent text-violet-700 px-4 py-2 hover:text-violet-800"
-            />
+            >
+              Sign Up
+            </Button>
 
             <Button
               onClick={toggleSignInModal}
-              text="Sign In"
               className="bg-violet-600 text-white px-6 py-2 rounded-lg hover:bg-violet-700"
-            />
+            >
+              Sign In
+            </Button>
           </div>
         )}
 
@@ -125,10 +127,9 @@ const NavbarWithSearch = ({
                   {authError && (
                     <p className="text-red-500 text-sm">{authError}</p>
                   )}
-                  <Button
-                    text="Sign Up"
-                    className="w-full py-2.5 px-5 bg-violet-700 text-white rounded-lg hover:bg-violet-800"
-                  />
+                  <Button className="w-full py-2.5 px-5 bg-violet-700 text-white rounded-lg hover:bg-violet-800">
+                    Sign Up
+                  </Button>
                 </form>
               </div>
             </Modal>
@@ -158,10 +159,9 @@ const NavbarWithSearch = ({
                   {authError && (
                     <p className="text-red-500 text-sm">{authError}</p>
                   )}
-                  <Button
-                    text="Sign In"
-                    className="w-full py-2.5 px-5 bg-violet-700 text-white rounded-lg hover:bg-violet-800"
-                  />
+                  <Button className="w-full py-2.5 px-5 bg-violet-700 text-white rounded-lg hover:bg-violet-800">
+                    Sign In
+                  </Button>
                 </form>
               </div>
             </Modal>

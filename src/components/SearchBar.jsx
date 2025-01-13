@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "./Button";
 
 const SearchBar = ({ onSearch, searchQuery, setSearchQuery }) => {
   return (
@@ -14,7 +15,7 @@ const SearchBar = ({ onSearch, searchQuery, setSearchQuery }) => {
             placeholder="Search for books by title, author, or keyword"
           />
         </div>
-        <button
+        <Button
           type="submit"
           className="inline-flex items-center py-2.5 px-3 ms-2 text-sm font-medium text-white bg-violet-700 rounded-lg border border-violet-700 hover:bg-violet-800 focus:outline-none focus:ring-violet-300"
         >
@@ -33,7 +34,7 @@ const SearchBar = ({ onSearch, searchQuery, setSearchQuery }) => {
               d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
             />
           </svg>
-        </button>
+        </Button>
       </form>
     </div>
   );

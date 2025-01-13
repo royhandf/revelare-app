@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "../../components/Button";
 
 const NotFound = () => {
   const handleClick = () => {
@@ -20,12 +21,12 @@ const NotFound = () => {
           The page you are looking for does not exist.
         </p>
 
-        <button
+        <Button
           onClick={handleClick}
           className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200"
         >
           Go Back Home
-        </button>
+        </Button>
       </div>
     </div>
   );

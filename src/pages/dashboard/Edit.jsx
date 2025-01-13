@@ -241,13 +241,15 @@ const Edit = () => {
             type="button"
             onClick={() => navigate(-1, { state: { refresh: true } })}
             className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
-            text="Back"
-          />
+          >
+            Back
+          </Button>
           <Button
             type="submit"
             className="bg-violet-600 text-white px-4 py-2 rounded hover:bg-violet-700"
-            text="Save Changes"
-          />
+          >
+            Save Changes
+          </Button>
         </div>
       </form>
     </div>

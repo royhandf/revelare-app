@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "../../components/Button";
 
 const Unauthorized = () => {
   const handleClick = () => {
@@ -18,12 +19,12 @@ const Unauthorized = () => {
           You do not have permission to access this page.
         </p>
 
-        <button
+        <Button
           onClick={handleClick}
           className="bg-violet-600 hover:bg-violet-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200"
         >
           Go Back
-        </button>
+        </Button>
       </div>
     </div>
   );

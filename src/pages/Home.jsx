@@ -121,10 +121,9 @@ const Home = () => {
                 placeholder="Search for books by title, author, or keyword"
               />
 
-              <Button
-                className="absolute right-2 top-2 bg-violet-700 text-white px-8 py-2 rounded-full hover:bg-violet-800 transition duration-300"
-                text="Search"
-              />
+              <Button className="absolute right-2 top-2 bg-violet-700 text-white px-8 py-2 rounded-full hover:bg-violet-800 transition duration-300">
+                Search
+              </Button>
             </form>
           </div>
         </div>

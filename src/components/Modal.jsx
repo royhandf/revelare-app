@@ -18,10 +18,11 @@ function Modal({ children, isOpen, toggleModal, title, size = "max-w-md" }) {
           <div className="flex items-center justify-between p-4 md:px-5 border-b rounded-t">
             <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
             <Button
-              text={<MdOutlineClose />}
               onClick={toggleModal}
               className="text-gray-400 hover:text-gray-900 rounded-lg text-sm w-8 h-8 flex items-center justify-center"
-            />
+            >
+              <MdOutlineClose />
+            </Button>
           </div>
           {children || (
             <div className="p-4 md:p-5">

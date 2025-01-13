@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "./Button";
 
 const BookCard = ({ book }) => {
   return (
@@ -30,9 +31,9 @@ const BookCard = ({ book }) => {
           </div>
         </div>
         <div className="mt-3 pt-3 border-t border-gray-100">
-          <button className="w-full text-center text-sm text-violet-600 hover:text-violet-800 font-medium">
+          <Button className="w-full text-center text-sm text-violet-600 hover:text-violet-800 font-medium">
             View Details
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { config } from "../configs";
+import { getItem, removeItem, setItem } from "./storage";
 
 export async function searchBooks(query, page = 1) {
   try {
@@ -41,9 +42,9 @@ export async function signup(data) {
 
     if (response.data.status === "success") {
       const { token, user } = response.data;
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
 
+      setItem("token", token);
+      setItem("user", user);
       return response.data;
     } else {
       throw new Error(response.data.message || "Failed to register");
@@ -62,25 +63,33 @@ export async function signin(email, password) {
 
     if (response.data.status === "success") {
       const { token, user } = response.data;
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
 
+      setItem("token", token);
+      setItem("user", user);
       return response.data;
     } else {
       throw new Error(response.data.message || "Something went wrong");
     }
   } catch (error) {
-    throw error;
+    if (error.response) {
+      if (error.response.status === 401) {
+        throw new Error("Invalid email or password.");
+      } else {
+        throw new Error(error.response.data.error || "Something went wrong.");
+      }
+    } else {
+      throw new Error("Network error. Please try again.");
+    }
   }
 }
 
 export async function getData() {
   try {
-    const token = localStorage.getItem("token");
+    const token = getItem("token");
 
     if (!token) {
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
+      removeItem("user");
+      removeItem("token");
       throw new Error("Unauthorized");
     }
 
@@ -102,11 +111,11 @@ export async function getData() {
 
 export async function addBook(data) {
   try {
-    const token = localStorage.getItem("token");
+    const token = getItem("token");
 
     if (!token) {
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
+      removeItem("user");
+      removeItem("token");
       throw new Error("Unauthorized");
     }
 
@@ -136,11 +145,11 @@ export async function addBook(data) {
 
 export async function updateBook(id, data) {
   try {
-    const token = localStorage.getItem("token");
+    const token = getItem("token");
 
     if (!token) {
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
+      removeItem("user");
+      removeItem("token");
       throw new Error("Unauthorized");
     }
 
@@ -166,11 +175,11 @@ export async function updateBook(id, data) {
 
 export async function getBookForEdit(id) {
   try {
-    const token = localStorage.getItem("token");
+    const token = getItem("token");
 
     if (!token) {
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
+      removeItem("user");
+      removeItem("token");
       throw new Error("Unauthorized");
     }
 
@@ -195,11 +204,11 @@ export async function getBookForEdit(id) {
 
 export async function deleteBook(id) {
   try {
-    const token = localStorage.getItem("token");
+    const token = getItem("token");
 
     if (!token) {
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
+      removeItem("user");
+      removeItem("token");
       throw new Error("Unauthorized");
     }
 

@@ -1,18 +1,20 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { searchBooks, signin, signup } from "../utils/fetch";
-import ReactPaginate from "react-paginate";
 import NavbarWithSearch from "../components/NavbarWithSearch";
 import Footer from "../components/Footer";
 import BookCard from "../components/BookCard";
+import Pagination from "../components/Pagination";
+import { useAuth } from "../context/AuthContext";
+import { getItem, getSession, setSession } from "../utils/storage";
+import Swal from "sweetalert2";
 
 function BookLists() {
   const location = useLocation();
   const navigate = useNavigate();
-
+  const { handleLogin } = useAuth();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [totalResults, setTotalResults] = useState(0);
@@ -20,25 +22,12 @@ function BookLists() {
   const [newQuery, setNewQuery] = useState("");
   const [isSignInModalOpen, setSignInModalOpen] = useState(false);
   const [isSignUpModalOpen, setSignUpModalOpen] = useState(false);
-  const [isDropdownMenuOpen, setDropdownMenuOpen] = useState(false);
-  const [isAuthenticated, setAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [authError, setAuthError] = useState("");
+  const [error, setError] = useState("");
   const [authForm, setAuthForm] = useState({
     name: "",
     email: "",
     password: "",
   });
-
-  useEffect(() => {
-    const savedToken = localStorage.getItem("token");
-    const savedUser = JSON.parse(localStorage.getItem("user"));
-
-    if (savedToken && savedUser) {
-      setAuthenticated(true);
-      setCurrentUser(savedUser);
-    }
-  }, []);
 
   useEffect(() => {
     const queryFromUrl =
@@ -59,14 +48,21 @@ function BookLists() {
 
   const fetchBooks = async (query, page) => {
     setLoading(true);
-    setError(null);
     try {
       const result = await searchBooks(query, page);
       setBooks(result.data);
       setTotalPages(result.total_pages);
       setTotalResults(result.total_results);
+
+      const sessionQuery = getSession("query");
+
+      if (query !== sessionQuery && page === 1) {
+        const relatedBooks = result.data.slice(0, 8);
+        setSession("query", query);
+        setSession("relatedBooks", relatedBooks);
+      }
     } catch (err) {
-      setError("Gagal memuat data buku. Silakan coba lagi.");
+      setError("Failed to fetch books");
     } finally {
       setLoading(false);
     }
@@ -84,45 +80,39 @@ function BookLists() {
 
   const handleSignUpSubmit = async (e) => {
     e.preventDefault();
-    setAuthError("");
 
     try {
       const response = await signup(authForm);
 
       if (response.status === "success") {
-        setAuthenticated(true);
-        setCurrentUser(response.user);
+        handleLogin(response.user, response.token);
         setSignInModalOpen(false);
       }
     } catch (error) {
-      setAuthError(error.message || "Failed to sign up. Please try again.");
+      Swal.fire({
+        icon: "error",
+        title: "Failed to sign up",
+        text: error.message || "Something went wrong",
+      });
     }
   };
 
   const handleSignInSubmit = async (e) => {
     e.preventDefault();
-    setAuthError("");
 
     try {
       const response = await signin(authForm.email, authForm.password);
       if (response.status === "success") {
-        setAuthenticated(true);
-        setCurrentUser(response.user);
+        handleLogin(response.user, response.token);
         setSignInModalOpen(false);
       }
     } catch (error) {
-      setAuthError(error.message || "Failed to sign in. Please try again.");
+      Swal.fire({
+        icon: "error",
+        title: "Failed to sign in",
+        text: error.message || "Something went wrong",
+      });
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setAuthenticated(false);
-    setCurrentUser(null);
-    setDropdownMenuOpen(false);
-
-    window.location.reload();
   };
 
   const handleSearch = (e) => {
@@ -133,26 +123,25 @@ function BookLists() {
   };
 
   const handleBookClick = (bookId) => {
-    window.location.href = `/books/${bookId}`;
+    const token = getItem("token");
+    if (token) {
+      window.location.href = `/books/${bookId}`;
+    } else {
+      setSignInModalOpen(true);
+    }
   };
 
   return (
     <>
       <NavbarWithSearch
-        isAuthenticated={isAuthenticated}
-        currentUser={currentUser}
         isSignInModalOpen={isSignInModalOpen}
         isSignUpModalOpen={isSignUpModalOpen}
         toggleSignInModal={() => setSignInModalOpen(!isSignInModalOpen)}
         toggleSignUpModal={() => setSignUpModalOpen(!isSignUpModalOpen)}
-        isDropdownMenuOpen={isDropdownMenuOpen}
-        toggleDropdownMenu={() => setDropdownMenuOpen(!isDropdownMenuOpen)}
         signInForm={authForm}
         handleAuthChange={handleAuthInputChange}
         handleSignIn={handleSignInSubmit}
         handleSignUp={handleSignUpSubmit}
-        authError={authError}
-        handleLogout={handleLogout}
         onSearch={handleSearch}
         searchQuery={newQuery}
         setSearchQuery={setNewQuery}
@@ -171,7 +160,15 @@ function BookLists() {
               </>
             )}
           </div>
-          {error && <p className="text-lg text-gray-600">{error}</p>}
+          {error && (
+            <div
+              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mx-auto mt-4"
+              role="alert"
+            >
+              <strong className="font-bold">Error!</strong>
+              <span className="block sm:inline"> {error}</span>
+            </div>
+          )}
           {loading ? (
             <p className="text-md text-gray-600">Loading...</p>
           ) : books.length > 0 ? (
@@ -189,21 +186,10 @@ function BookLists() {
                 ))}
               </div>
 
-              <ReactPaginate
-                previousLabel={"<"}
-                nextLabel={">"}
-                breakLabel={"..."}
-                pageCount={totalPages || 1}
-                forcePage={currentPage - 1}
-                onPageChange={handlePageClick}
-                marginPagesDisplayed={2}
-                pageRangeDisplayed={4}
-                containerClassName="flex justify-center -space-x-px h-8 text-sm"
-                pageClassName="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700"
-                activeClassName="z-10 flex items-center justify-center px-3 h-8 leading-tight text-violet-700 border border-violet-400 bg-violet-50 hover:bg-violet-100 hover:text-violet-700"
-                previousLinkClassName="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700"
-                nextLinkClassName="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700"
-                disabledClassName="opacity-50 cursor-not-allowed"
+              <Pagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                handlePageClick={handlePageClick}
               />
             </>
           ) : !loading && query ? (

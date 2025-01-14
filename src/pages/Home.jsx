@@ -1,36 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import Button from "../components/Button";
 import { signin, signup } from "../utils/fetch";
+import { FaSearch } from "react-icons/fa";
+import Select from "../components/Select";
+import { SCENARIO_OPTIONS } from "../constants";
+import { useAuth } from "../context/AuthContext";
+import Swal from "sweetalert2";
 
 const Home = () => {
+  const { handleLogin } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [isSignInModalOpen, setSignInModalOpen] = useState(false);
   const [isSignUpModalOpen, setSignUpModalOpen] = useState(false);
-  const [isDropdownMenuOpen, setDropdownMenuOpen] = useState(false);
-  const [isAuthenticated, setAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [authError, setAuthError] = useState("");
+  const [selectedScenario, setSelectedScenario] = useState("");
   const [authForm, setAuthForm] = useState({
     name: "",
     email: "",
     password: "",
   });
 
-  useEffect(() => {
-    const savedToken = localStorage.getItem("token");
-    const savedUser = JSON.parse(localStorage.getItem("user"));
-
-    if (savedToken && savedUser) {
-      setAuthenticated(true);
-      setCurrentUser(savedUser);
-    }
-  }, []);
-
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/books?query=${searchQuery}`;
+      window.location.href = `/books?query=${searchQuery}&`;
     }
   };
 
@@ -41,64 +34,52 @@ const Home = () => {
 
   const handleSignUpSubmit = async (e) => {
     e.preventDefault();
-    setAuthError("");
 
     try {
       const response = await signup(authForm);
 
       if (response.status === "success") {
-        setAuthenticated(true);
-        setCurrentUser(response.user);
+        handleLogin(response.user, response.token);
         setSignInModalOpen(false);
       }
     } catch (error) {
-      setAuthError(error.message || "Failed to sign up. Please try again.");
+      Swal.fire({
+        icon: "error",
+        title: "Failed to sign up",
+        text: error.message || "Something went wrong",
+      });
     }
   };
 
   const handleSignInSubmit = async (e) => {
     e.preventDefault();
-    setAuthError("");
 
     try {
       const response = await signin(authForm.email, authForm.password);
       if (response.status === "success") {
-        setAuthenticated(true);
-        setCurrentUser(response.user);
+        handleLogin(response.user, response.token);
         setSignInModalOpen(false);
       }
     } catch (error) {
-      setAuthError(error.message || "Failed to sign in. Please try again.");
+      Swal.fire({
+        icon: "error",
+        title: "Failed to sign in",
+        text: error.message || "Something went wrong",
+      });
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setAuthenticated(false);
-    setCurrentUser(null);
-    setDropdownMenuOpen(false);
-
-    window.location.reload();
   };
 
   return (
     <>
       <Navbar
-        isAuthenticated={isAuthenticated}
-        currentUser={currentUser}
         isSignInModalOpen={isSignInModalOpen}
         isSignUpModalOpen={isSignUpModalOpen}
         toggleSignInModal={() => setSignInModalOpen(!isSignInModalOpen)}
         toggleSignUpModal={() => setSignUpModalOpen(!isSignUpModalOpen)}
-        isDropdownMenuOpen={isDropdownMenuOpen}
-        toggleDropdownMenu={() => setDropdownMenuOpen(!isDropdownMenuOpen)}
         signInForm={authForm}
         handleAuthChange={handleAuthInputChange}
         handleSignIn={handleSignInSubmit}
         handleSignUp={handleSignUpSubmit}
-        authError={authError}
-        handleLogout={handleLogout}
       />
       <section className="max-w-7xl mx-auto pb-10 px-6 h-[80vh] flex flex-col justify-center items-center">
         <div className="text-center">
@@ -110,22 +91,30 @@ const Home = () => {
             Effortlessly connect with the books you love! Use our semantic
             search to browse titles, authors, or keywords.
           </p>
-          <div className="relative max-w-2xl mx-auto">
-            <form onSubmit={handleSearch}>
-              <input
-                type="text"
-                name="query"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-6 py-4 rounded-full shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
-                placeholder="Search for books by title, author, or keyword"
+
+          <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
+            <div className="flex">
+              <Select
+                options={SCENARIO_OPTIONS}
+                value={selectedScenario}
+                onChange={(e) => setSelectedScenario(e.target.value)}
               />
 
-              <Button className="absolute right-2 top-2 bg-violet-700 text-white px-8 py-2 rounded-full hover:bg-violet-800 transition duration-300">
-                Search
-              </Button>
-            </form>
-          </div>
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  name="query"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full py-4 px-3 text-sm text-gray-800 bg-white rounded-e-full border border-gray-300 focus:ring-1 focus:ring-violet-600 focus:border-violet-600 focus:outline-none focus:z-10"
+                  placeholder="Search for books by title, author, or keyword"
+                />
+                <Button className="absolute top-0 end-0 p-4 text-sm font-sm h-full text-white bg-violet-700 rounded-e-3xl border border-violet-700 hover:bg-violet-800 focus:ring-1 focus:outline-none focus:ring-violet-300">
+                  <FaSearch className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </form>
         </div>
       </section>
     </>

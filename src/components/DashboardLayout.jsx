@@ -1,25 +1,17 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "./Navbar";
-import { useState } from "react";
 
 const DashboardLayout = () => {
-  const { isAuthenticated, currentUser, handleLogout } = useAuth();
-  const [isDropdownMenuOpen, setDropdownMenuOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
-    return (window.location.href = "/unauthorized");
+    return <Navigate to="/" replace />;
   }
 
   return (
     <>
-      <Navbar
-        isAuthenticated={isAuthenticated}
-        currentUser={currentUser}
-        isDropdownMenuOpen={isDropdownMenuOpen}
-        toggleDropdownMenu={() => setDropdownMenuOpen(!isDropdownMenuOpen)}
-        handleLogout={handleLogout}
-      />
+      <Navbar />
       <main className="max-w-7xl mx-auto p-6">
         <Outlet />
       </main>

@@ -4,26 +4,29 @@ import Modal from "./Modal";
 import Button from "./Button";
 import InputField from "./InputField";
 import Dropdown from "./Dropdown";
+import { useAuth } from "../context/AuthContext";
 
 const NavbarWithSearch = ({
-  isAuthenticated,
-  currentUser,
   isSignInModalOpen,
   isSignUpModalOpen,
   toggleSignInModal,
   toggleSignUpModal,
-  isDropdownMenuOpen,
-  toggleDropdownMenu,
   signInForm,
   handleAuthChange,
   handleSignIn,
   handleSignUp,
-  authError,
-  handleLogout,
   onSearch,
   searchQuery,
   setSearchQuery,
 }) => {
+  const {
+    isAuthenticated,
+    currentUser,
+    isDropdownMenuOpen,
+    toggleDropdownMenu,
+    handleLogout,
+  } = useAuth();
+
   return (
     <nav className="bg-white py-4 px-6 shadow-sm">
       <div className="max-w-screen-xl flex items-center justify-between mx-auto p-2 gap-3">
@@ -90,7 +93,6 @@ const NavbarWithSearch = ({
           </div>
         )}
 
-        {/* Modal Sign In */}
         {!isAuthenticated && (
           <>
             <Modal
@@ -124,9 +126,7 @@ const NavbarWithSearch = ({
                     onChange={handleAuthChange}
                     required
                   />
-                  {authError && (
-                    <p className="text-red-500 text-sm">{authError}</p>
-                  )}
+
                   <Button className="w-full py-2.5 px-5 bg-violet-700 text-white rounded-lg hover:bg-violet-800">
                     Sign Up
                   </Button>
@@ -156,9 +156,7 @@ const NavbarWithSearch = ({
                     onChange={handleAuthChange}
                     required
                   />
-                  {authError && (
-                    <p className="text-red-500 text-sm">{authError}</p>
-                  )}
+
                   <Button className="w-full py-2.5 px-5 bg-violet-700 text-white rounded-lg hover:bg-violet-800">
                     Sign In
                   </Button>

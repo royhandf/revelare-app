@@ -1,12 +1,18 @@
-import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { getBookById, signin } from "../utils/fetch";
+import { useEffect, useMemo, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { getBookById, signin, signup } from "../utils/fetch";
 import Footer from "../components/Footer";
 import NavbarWithSearch from "../components/NavbarWithSearch";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay, FreeMode } from "swiper/modules";
 import Breadcrumb from "../components/Breadcrumb";
 import BookCard from "../components/BookCard";
+import { FiDownload, FiBookmark } from "react-icons/fi";
+import Button from "../components/Button";
+import { RANDOM_COLORS } from "../constants";
+import { useAuth } from "../context/AuthContext";
+import { getSession } from "../utils/storage";
+import Swal from "sweetalert2";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -15,36 +21,32 @@ import "swiper/css/free-mode";
 
 function BookDetail() {
   const { id } = useParams();
+  const { handleLogin, handleLogout } = useAuth();
   const [book, setBook] = useState("");
   const [relatedBooks, setRelatedBooks] = useState([]);
   const [randomColor, setRandomColor] = useState("");
   const [error, setError] = useState(null);
   const [newQuery, setNewQuery] = useState("");
-  const [isAuthModalOpen, setAuthModalOpen] = useState(false);
-  const [isDropdownMenuOpen, setDropdownMenuOpen] = useState(false);
-  const [isAuthenticated, setAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [signInError, setSignInError] = useState("");
-  const [signInForm, setSignInForm] = useState({ email: "", password: "" });
-
-  const navigate = useNavigate();
+  const [isSignInModalOpen, setSignInModalOpen] = useState(false);
+  const [isSignUpModalOpen, setSignUpModalOpen] = useState(false);
+  const [authForm, setAuthForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
 
   useEffect(() => {
     const fetchBook = async () => {
       try {
         const result = await getBookById(id);
         setBook(result.data);
-        setRelatedBooks(result.related_books);
+        const savedRelatedBooks = getSession("relatedBooks");
 
-        const colors = [
-          "#f5d0fe",
-          "#bae6fc",
-          "#A5F3FC",
-          "#fecdd3",
-          "#FED7AA",
-          "#ddd6fe",
-        ];
-        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        if (Array.isArray(savedRelatedBooks))
+          setRelatedBooks(savedRelatedBooks);
+
+        const randomColor =
+          RANDOM_COLORS[Math.floor(Math.random() * RANDOM_COLORS.length)];
         setRandomColor(randomColor);
       } catch (err) {
         setError("Failed to fetch book data");
@@ -52,18 +54,8 @@ function BookDetail() {
     };
 
     fetchBook();
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [id]);
-
-  useEffect(() => {
-    const savedToken = localStorage.getItem("token");
-    const savedUser = JSON.parse(localStorage.getItem("user"));
-
-    if (savedToken && savedUser) {
-      setAuthenticated(true);
-      setCurrentUser(savedUser);
-    }
-  }, []);
 
   const handleDownload = () => {
     if (book && book.pdf_link) {
@@ -71,35 +63,46 @@ function BookDetail() {
     }
   };
 
-  const handleSignInInputChange = (event) => {
-    const { name, value } = event.target;
-    setSignInForm((prevForm) => ({ ...prevForm, [name]: value }));
+  const handleAuthInputChange = (e) => {
+    const { name, value } = e.target;
+    setAuthForm((prevForm) => ({ ...prevForm, [name]: value }));
+  };
+
+  const handleSignUpSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await signup(authForm);
+
+      if (response.status === "success") {
+        handleLogin(response.user, response.token);
+        setSignInModalOpen(false);
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed to sign up",
+        text: error.message || "Something went wrong",
+      });
+    }
   };
 
   const handleSignInSubmit = async (e) => {
     e.preventDefault();
-    setSignInError("");
 
     try {
-      const response = await signin(signInForm.email, signInForm.password);
+      const response = await signin(authForm.email, authForm.password);
       if (response.status === "success") {
-        setAuthenticated(true);
-        setCurrentUser(response.user);
-        navigate(`/books/${id}`);
+        handleLogin(response.user, response.token);
+        setSignInModalOpen(false);
       }
     } catch (error) {
-      setSignInError(error.message || "Failed to sign in. Please try again.");
+      Swal.fire({
+        icon: "error",
+        title: "Failed to sign in",
+        text: error.message || "Something went wrong",
+      });
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setAuthenticated(false);
-    setCurrentUser(null);
-    setDropdownMenuOpen(false);
-
-    window.location.reload();
   };
 
   const handleSearch = (e) => {
@@ -109,34 +112,39 @@ function BookDetail() {
     }
   };
 
+  const filteredRelatedBooks = useMemo(() => {
+    if (relatedBooks && book.id) {
+      return relatedBooks.filter((relatedBook) => relatedBook.id !== book.id);
+    }
+    return [];
+  }, [relatedBooks, book.id]);
+
   return (
     <>
       <NavbarWithSearch
-        isAuthenticated={isAuthenticated}
-        currentUser={currentUser}
-        isAuthModalOpen={isAuthModalOpen}
-        toggleSignInModal={() => setAuthModalOpen(!isAuthModalOpen)}
-        isDropdownMenuOpen={isDropdownMenuOpen}
-        toggleDropdownMenu={() => setDropdownMenuOpen(!isDropdownMenuOpen)}
-        signInForm={signInForm}
-        handleSignInInputChange={handleSignInInputChange}
+        isSignInModalOpen={isSignInModalOpen}
+        isSignUpModalOpen={isSignUpModalOpen}
+        toggleSignInModal={() => setSignInModalOpen(!isSignInModalOpen)}
+        toggleSignUpModal={() => setSignUpModalOpen(!isSignUpModalOpen)}
+        signInForm={authForm}
+        handleAuthChange={handleAuthInputChange}
         handleSignIn={handleSignInSubmit}
-        signInError={signInError}
+        handleSignUp={handleSignUpSubmit}
         handleLogout={handleLogout}
         onSearch={handleSearch}
         searchQuery={newQuery}
         setSearchQuery={setNewQuery}
       />
-      <Breadcrumb item={{ title: book.title }} />
       {error && (
         <div
-          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mx-auto mt-4"
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded container mx-auto"
           role="alert"
         >
-          <strong className="font-bold">Error!</strong>
-          <span className="block sm:inline"> {error}</span>
+          <strong className="font-bold">Error!</strong> {error}
         </div>
       )}
+      <Breadcrumb item={{ title: book.title }} />
+
       <div className="container mx-auto p-4 mb-20 bg-white">
         <div className="mx-auto lg:max-w-7xl sm:max-w-full">
           <div className="grid gap-24 md:grid-cols-4">
@@ -196,32 +204,23 @@ function BookDetail() {
                 />
               </div>
 
-              <button
+              <Button
                 onClick={handleDownload}
-                className="w-full flex items-center justify-center mt-6 px-4 py-2 text-sm font-medium text-white bg-violet-700 rounded-lg border border-violet-700 hover:bg-violet-800 focus:outline-none focus:ring-violet-300"
+                className="w-full flex items-center justify-center mt-6 mb-3 px-4 py-2 text-sm font-medium text-white bg-violet-700 rounded-lg border border-violet-700 hover:bg-violet-800 focus:outline-none focus:ring-violet-300"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-white-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3"
-                  />
-                </svg>
-                <span className="ml-1">Download Ebook</span>
-              </button>
+                <FiDownload className="h-5 w-5" />
+                <span className="ml-2">Download</span>
+              </Button>
+
+              <Button className="w-full flex items-center justify-center mt-3 px-4 py-2 text-sm font-medium text-violet-800 bg-transparent rounded-lg border border-violet-700 hover:bg-violet-100 focus:outline-none focus:ring-violet-300">
+                <FiBookmark className="h-5 w-5" />
+                <span className="ml-2">Save</span>
+              </Button>
             </div>
           </div>
         </div>
       </div>
       <div className="container mx-auto p-4 mb-10 bg-white">
-        {" "}
         <div className="mx-auto max-w-screen-xl">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">
             Similar Books You Might Like
@@ -234,7 +233,7 @@ function BookDetail() {
             freeMode={true}
             className="swiper-container"
           >
-            {relatedBooks.map((book) => (
+            {filteredRelatedBooks.map((book) => (
               <SwiperSlide key={book.id}>
                 <Link to={`/books/${book.id}`} className="block">
                   <BookCard book={book} />

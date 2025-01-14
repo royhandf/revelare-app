@@ -1,5 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 import { createContext, useContext, useEffect, useState } from "react";
+import { getItem, removeItem, setItem } from "../utils/storage";
 
 const AuthContext = createContext();
 
@@ -7,10 +8,11 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDropdownMenuOpen, setDropdownMenuOpen] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const user = JSON.parse(localStorage.getItem("user"));
+    const token = getItem("token");
+    const user = getItem("user");
 
     if (token && user) {
       try {
@@ -33,23 +35,44 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
   }
 
+  const toggleDropdownMenu = () => {
+    setDropdownMenuOpen((prev) => !prev);
+  };
+
+  const handleLogin = (user, token) => {
+    setItem("token", token);
+    setItem("user", user);
+    setAuthenticated(true);
+    setCurrentUser(user);
+  };
+
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    removeItem("token");
+    removeItem("user");
     setAuthenticated(false);
     setCurrentUser(null);
+    setDropdownMenuOpen(false);
 
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 0);
+    window.location.href = "/";
   };
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, currentUser, handleLogout }}
+      value={{
+        isAuthenticated,
+        currentUser,
+        isDropdownMenuOpen,
+        toggleDropdownMenu,
+        handleLogin,
+        handleLogout,
+      }}
     >
       {children}
     </AuthContext.Provider>

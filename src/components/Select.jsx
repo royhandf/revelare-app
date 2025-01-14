@@ -1,12 +1,11 @@
 import React from "react";
 
-const Select = ({ id, options, value, onChange }) => {
+const Select = ({ options, value, onChange, className }) => {
   return (
     <select
-      id={id}
       value={value}
       onChange={onChange}
-      className="text-sm text-gray-700 ps-3 bg-white divide-y divide-gray-100 shadow-sm w-48 rounded-s-full rounded-e-none border border-gray-300 focus:ring-1 focus:ring-violet-500 focus:border-violet-500 focus:outline-none focus:z-10"
+      className={`text-sm text-gray-700 ps-3 bg-white divide-y divide-gray-100 shadow-sm w-48 rounded-s-3xl rounded-e-none border border-gray-300 focus:ring-1 focus:ring-violet-500 focus:border-violet-500 focus:outline-none focus:z-10 ${className}`}
     >
       {options.map((option, index) => (
         <option

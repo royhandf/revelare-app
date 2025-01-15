@@ -10,6 +10,16 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isDropdownMenuOpen, setDropdownMenuOpen] = useState(false);
 
+  const handleLogout = () => {
+    removeItem("token");
+    removeItem("user");
+    setAuthenticated(false);
+    setCurrentUser(null);
+    setDropdownMenuOpen(false);
+
+    window.location.href = "/";
+  };
+
   useEffect(() => {
     const token = getItem("token");
     const user = getItem("user");
@@ -51,16 +61,6 @@ export const AuthProvider = ({ children }) => {
     setItem("user", user);
     setAuthenticated(true);
     setCurrentUser(user);
-  };
-
-  const handleLogout = () => {
-    removeItem("token");
-    removeItem("user");
-    setAuthenticated(false);
-    setCurrentUser(null);
-    setDropdownMenuOpen(false);
-
-    window.location.href = "/";
   };
 
   return (

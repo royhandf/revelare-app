@@ -3,7 +3,7 @@ import DropdownItem from "./DropdownItem";
 import { getItem } from "../utils/storage";
 
 const Dropdown = ({ onSignOut }) => {
-  const currentUser = JSON.parse(getItem("user"));
+  const currentUser = getItem("user");
 
   return (
     <div className="absolute right-0 z-10 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow w-44">

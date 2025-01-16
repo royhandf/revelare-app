@@ -1,86 +1,24 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import Button from "../components/Button";
-import { signin, signup } from "../utils/fetch";
 import { FaSearch } from "react-icons/fa";
 import Select from "../components/Select";
 import { SCENARIO_OPTIONS } from "../constants";
-import { useAuth } from "../context/AuthContext";
-import Swal from "sweetalert2";
 
 const Home = () => {
-  const { handleLogin } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [isSignInModalOpen, setSignInModalOpen] = useState(false);
-  const [isSignUpModalOpen, setSignUpModalOpen] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState("");
-  const [authForm, setAuthForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      window.location.href = `/books?query=${searchQuery}&`;
-    }
-  };
-
-  const handleAuthInputChange = (e) => {
-    const { name, value } = e.target;
-    setAuthForm((prevForm) => ({ ...prevForm, [name]: value }));
-  };
-
-  const handleSignUpSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const response = await signup(authForm);
-
-      if (response.status === "success") {
-        handleLogin(response.user, response.token);
-        setSignInModalOpen(false);
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Failed to sign up",
-        text: error.message || "Something went wrong",
-      });
-    }
-  };
-
-  const handleSignInSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const response = await signin(authForm.email, authForm.password);
-      if (response.status === "success") {
-        handleLogin(response.user, response.token);
-        setSignInModalOpen(false);
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Failed to sign in",
-        text: error.message || "Something went wrong",
-      });
+    if (searchQuery.trim() && selectedScenario) {
+      window.location.href = `/books?query=${searchQuery}&scenario=${selectedScenario}`;
     }
   };
 
   return (
     <>
-      <Navbar
-        isSignInModalOpen={isSignInModalOpen}
-        isSignUpModalOpen={isSignUpModalOpen}
-        toggleSignInModal={() => setSignInModalOpen(!isSignInModalOpen)}
-        toggleSignUpModal={() => setSignUpModalOpen(!isSignUpModalOpen)}
-        signInForm={authForm}
-        handleAuthChange={handleAuthInputChange}
-        handleSignIn={handleSignInSubmit}
-        handleSignUp={handleSignUpSubmit}
-      />
+      <Navbar />
       <section className="max-w-7xl mx-auto pb-10 px-6 h-[80vh] flex flex-col justify-center items-center">
         <div className="text-center">
           <h1 className="text-4xl sm:text-5xl md:text-5xl lg:text-5xl xl:text-6xl mb-3 text-center text-gray-800 font-black leading-10">

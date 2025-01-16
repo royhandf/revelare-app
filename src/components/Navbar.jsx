@@ -5,23 +5,21 @@ import Button from "./Button";
 import InputField from "./InputField";
 import { useAuth } from "../context/AuthContext";
 
-const Navbar = ({
-  isSignInModalOpen,
-  isSignUpModalOpen,
-  toggleSignInModal,
-  toggleSignUpModal,
-  signInForm,
-  handleAuthChange,
-  handleSignIn,
-  handleSignUp,
-  isShowAuth = true,
-}) => {
+const Navbar = () => {
   const {
     isAuthenticated,
     currentUser,
     isDropdownMenuOpen,
     toggleDropdownMenu,
     handleLogout,
+    isSignInModalOpen,
+    isSignUpModalOpen,
+    toggleSignInModal,
+    toggleSignUpModal,
+    authForm,
+    handleAuthInputChange,
+    handleSignInSubmit,
+    handleSignUpSubmit,
   } = useAuth();
 
   return (
@@ -68,7 +66,7 @@ const Navbar = ({
             </Button>
             {isDropdownMenuOpen && <Dropdown onSignOut={handleLogout} />}
           </div>
-        ) : isShowAuth ? (
+        ) : (
           <div className="space-x-4">
             <Button
               onClick={toggleSignUpModal}
@@ -83,40 +81,40 @@ const Navbar = ({
               Sign In
             </Button>
           </div>
-        ) : null}
+        )}
 
-        {!isAuthenticated && isShowAuth && (
+        {!isAuthenticated && (
           <>
-            {toggleSignUpModal && isSignUpModalOpen !== undefined && (
+            {isSignUpModalOpen && (
               <Modal
                 isOpen={isSignUpModalOpen}
                 toggleModal={toggleSignUpModal}
                 title="Sign Up for an Account"
               >
                 <div className="p-4 md:p-5">
-                  <form className="space-y-4" onSubmit={handleSignUp}>
+                  <form className="space-y-4" onSubmit={handleSignUpSubmit}>
                     <InputField
                       label="Name"
                       name="name"
                       type="text"
-                      value={signInForm.name}
-                      onChange={handleAuthChange}
+                      value={authForm.name}
+                      onChange={handleAuthInputChange}
                       required
                     />
                     <InputField
                       label="Email"
                       name="email"
                       type="email"
-                      value={signInForm.email}
-                      onChange={handleAuthChange}
+                      value={authForm.email}
+                      onChange={handleAuthInputChange}
                       required
                     />
                     <InputField
                       label="Password"
                       name="password"
                       type="password"
-                      value={signInForm.password}
-                      onChange={handleAuthChange}
+                      value={authForm.password}
+                      onChange={handleAuthInputChange}
                       required
                     />
                     <Button className="w-full py-2.5 px-5 bg-violet-700 text-white rounded-lg hover:bg-violet-800">
@@ -126,28 +124,28 @@ const Navbar = ({
                 </div>
               </Modal>
             )}
-            {toggleSignInModal && isSignInModalOpen !== undefined && (
+            {isSignInModalOpen && (
               <Modal
                 isOpen={isSignInModalOpen}
                 toggleModal={toggleSignInModal}
                 title="Sign In to Your Account"
               >
                 <div className="p-4 md:p-5">
-                  <form className="space-y-4" onSubmit={handleSignIn}>
+                  <form className="space-y-4" onSubmit={handleSignInSubmit}>
                     <InputField
                       label="Email"
                       name="email"
                       type="email"
-                      value={signInForm.email}
-                      onChange={handleAuthChange}
+                      value={authForm.email}
+                      onChange={handleAuthInputChange}
                       required
                     />
                     <InputField
                       label="Password"
                       name="password"
                       type="password"
-                      value={signInForm.password}
-                      onChange={handleAuthChange}
+                      value={authForm.password}
+                      onChange={handleAuthInputChange}
                       required
                     />
                     <Button className="w-full py-2.5 px-5 bg-violet-700 text-white rounded-lg hover:bg-violet-800">

@@ -1,12 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
 import Button from "./Button";
 import Select from "./Select";
 import { SCENARIO_OPTIONS } from "../constants";
 import { FaSearch } from "react-icons/fa";
 
-const SearchBar = ({ onSearch, searchQuery, setSearchQuery }) => {
-  const [selectedScenario, setSelectedScenario] = useState("");
-
+const SearchBar = ({
+  onSearch,
+  searchQuery,
+  setSearchQuery,
+  selectedScenario,
+  setSelectedScenario,
+}) => {
   return (
     <form onSubmit={onSearch} className="flex-1 max-w-xl mx-auto">
       <div className="flex">
@@ -16,7 +20,6 @@ const SearchBar = ({ onSearch, searchQuery, setSearchQuery }) => {
           onChange={(e) => setSelectedScenario(e.target.value)}
           className="rounded-s-lg bg-gray-50"
         />
-
         <input
           type="text"
           name="query"

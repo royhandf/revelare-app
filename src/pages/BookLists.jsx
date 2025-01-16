@@ -1,18 +1,15 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { searchBooks, signin, signup } from "../utils/fetch";
+import { searchBooks } from "../utils/fetch";
 import NavbarWithSearch from "../components/NavbarWithSearch";
 import Footer from "../components/Footer";
 import BookCard from "../components/BookCard";
 import Pagination from "../components/Pagination";
-import { useAuth } from "../context/AuthContext";
-import { getItem, getSession, setSession } from "../utils/storage";
-import Swal from "sweetalert2";
+import { getSession, setSession } from "../utils/storage";
 
 function BookLists() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { handleLogin } = useAuth();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -20,36 +17,37 @@ function BookLists() {
   const [totalResults, setTotalResults] = useState(0);
   const [query, setQuery] = useState("");
   const [newQuery, setNewQuery] = useState("");
-  const [isSignInModalOpen, setSignInModalOpen] = useState(false);
-  const [isSignUpModalOpen, setSignUpModalOpen] = useState(false);
+  const [selectedScenario, setSelectedScenario] = useState("");
   const [error, setError] = useState("");
-  const [authForm, setAuthForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
 
   useEffect(() => {
     const queryFromUrl =
       new URLSearchParams(location.search).get("query") || "";
+    const scenarioFromUrl =
+      new URLSearchParams(location.search).get("scenario") || "";
     const pageFromUrl =
       parseInt(new URLSearchParams(location.search).get("page")) || 1;
 
-    if (queryFromUrl !== query || pageFromUrl !== currentPage) {
+    if (
+      queryFromUrl !== query ||
+      pageFromUrl !== currentPage ||
+      scenarioFromUrl !== selectedScenario
+    ) {
       setQuery(queryFromUrl);
+      setSelectedScenario(scenarioFromUrl);
       setCurrentPage(pageFromUrl);
 
-      fetchBooks(queryFromUrl, pageFromUrl);
+      fetchBooks(queryFromUrl, scenarioFromUrl, pageFromUrl);
     }
 
     window.scrollTo({ top: 0, behavior: "smooth" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
 
-  const fetchBooks = async (query, page) => {
+  const fetchBooks = async (query, scenario, page) => {
     setLoading(true);
     try {
-      const result = await searchBooks(query, page);
+      const result = await searchBooks(query, scenario, page);
       setBooks(result.data);
       setTotalPages(result.total_pages);
       setTotalResults(result.total_results);
@@ -73,86 +71,42 @@ function BookLists() {
     navigate(`/books?query=${query}&page=${selectedPage}`);
   };
 
-  const handleAuthInputChange = (e) => {
-    const { name, value } = e.target;
-    setAuthForm((prevForm) => ({ ...prevForm, [name]: value }));
-  };
-
-  const handleSignUpSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const response = await signup(authForm);
-
-      if (response.status === "success") {
-        handleLogin(response.user, response.token);
-        setSignInModalOpen(false);
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Failed to sign up",
-        text: error.message || "Something went wrong",
-      });
-    }
-  };
-
-  const handleSignInSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const response = await signin(authForm.email, authForm.password);
-      if (response.status === "success") {
-        handleLogin(response.user, response.token);
-        setSignInModalOpen(false);
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Failed to sign in",
-        text: error.message || "Something went wrong",
-      });
-    }
-  };
-
   const handleSearch = (e) => {
     e.preventDefault();
-    if (newQuery.trim()) {
-      window.location.href = `/books?query=${newQuery}`;
+    if (newQuery.trim() && selectedScenario) {
+      window.location.href = `/books?query=${newQuery}&scenario=${selectedScenario}`;
     }
   };
 
   const handleBookClick = (bookId) => {
-    const token = getItem("token");
-    if (token) {
-      window.location.href = `/books/${bookId}`;
-    } else {
-      setSignInModalOpen(true);
-    }
+    window.location.href = `/books/${bookId}`;
   };
 
   return (
     <>
       <NavbarWithSearch
-        isSignInModalOpen={isSignInModalOpen}
-        isSignUpModalOpen={isSignUpModalOpen}
-        toggleSignInModal={() => setSignInModalOpen(!isSignInModalOpen)}
-        toggleSignUpModal={() => setSignUpModalOpen(!isSignUpModalOpen)}
-        signInForm={authForm}
-        handleAuthChange={handleAuthInputChange}
-        handleSignIn={handleSignInSubmit}
-        handleSignUp={handleSignUpSubmit}
         onSearch={handleSearch}
         searchQuery={newQuery}
         setSearchQuery={setNewQuery}
+        selectedScenario={selectedScenario}
+        setSelectedScenario={setSelectedScenario}
       />
       <div className="container mx-auto px-4 py-8 min-h-[80vh]">
         <div className="p-4 mx-auto lg:max-w-7xl sm:max-w-full">
           <div className="mb-8">
+            {error && (
+              <div
+                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mx-auto mb-3"
+                role="alert"
+              >
+                <strong className="font-bold">Error!</strong>
+                <span className="block sm:inline"> {error}</span>
+              </div>
+            )}
             {query && (
               <>
                 <h1 className="text-3xl font-bold text-gray-800">
-                  Result for "{query}"
+                  Result for "{query}"{" "}
                 </h1>
                 <p className="mt-2 text-gray-600">
                   Found {totalResults || ""} matching books
@@ -160,15 +114,6 @@ function BookLists() {
               </>
             )}
           </div>
-          {error && (
-            <div
-              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mx-auto mt-4"
-              role="alert"
-            >
-              <strong className="font-bold">Error!</strong>
-              <span className="block sm:inline"> {error}</span>
-            </div>
-          )}
           {loading ? (
             <p className="text-md text-gray-600">Loading...</p>
           ) : books.length > 0 ? (

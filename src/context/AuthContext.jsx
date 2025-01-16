@@ -1,6 +1,8 @@
 import { jwtDecode } from "jwt-decode";
 import { createContext, useContext, useEffect, useState } from "react";
 import { getItem, removeItem, setItem } from "../utils/storage";
+import { signin, signup } from "../utils/fetch";
+import Swal from "sweetalert2";
 
 const AuthContext = createContext();
 
@@ -9,6 +11,13 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDropdownMenuOpen, setDropdownMenuOpen] = useState(false);
+  const [isSignInModalOpen, setSignInModalOpen] = useState(false);
+  const [isSignUpModalOpen, setSignUpModalOpen] = useState(false);
+  const [authForm, setAuthForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
 
   const handleLogout = () => {
     removeItem("token");
@@ -52,15 +61,53 @@ export const AuthProvider = ({ children }) => {
     );
   }
 
-  const toggleDropdownMenu = () => {
-    setDropdownMenuOpen((prev) => !prev);
+  const handleAuthInputChange = (e) => {
+    const { name, value } = e.target;
+    setAuthForm((prevForm) => ({ ...prevForm, [name]: value }));
   };
 
-  const handleLogin = (user, token) => {
-    setItem("token", token);
-    setItem("user", user);
-    setAuthenticated(true);
-    setCurrentUser(user);
+  const toggleDropdownMenu = () => setDropdownMenuOpen((prev) => !prev);
+  const toggleSignInModal = () => setSignInModalOpen((prev) => !prev);
+  const toggleSignUpModal = () => setSignUpModalOpen((prev) => !prev);
+
+  const handleSignUpSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await signup(authForm);
+      if (response.status === "success") {
+        setItem("token", response.token);
+        setItem("user", response.user);
+        setAuthenticated(true);
+        setCurrentUser(response.user);
+        setSignInModalOpen(false);
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed to sign up",
+        text: error.message || "Something went wrong",
+      });
+    }
+  };
+
+  const handleSignInSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await signin(authForm.email, authForm.password);
+      if (response.status === "success") {
+        setItem("token", response.token);
+        setItem("user", response.user);
+        setAuthenticated(true);
+        setCurrentUser(response.user);
+        setSignInModalOpen(false);
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed to sign in",
+        text: error.message || "Something went wrong",
+      });
+    }
   };
 
   return (
@@ -68,9 +115,16 @@ export const AuthProvider = ({ children }) => {
       value={{
         isAuthenticated,
         currentUser,
+        authForm,
         isDropdownMenuOpen,
+        isSignInModalOpen,
+        isSignUpModalOpen,
         toggleDropdownMenu,
-        handleLogin,
+        toggleSignInModal,
+        toggleSignUpModal,
+        handleAuthInputChange,
+        handleSignUpSubmit,
+        handleSignInSubmit,
         handleLogout,
       }}
     >

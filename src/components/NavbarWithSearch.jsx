@@ -7,17 +7,11 @@ import Dropdown from "./Dropdown";
 import { useAuth } from "../context/AuthContext";
 
 const NavbarWithSearch = ({
-  isSignInModalOpen,
-  isSignUpModalOpen,
-  toggleSignInModal,
-  toggleSignUpModal,
-  signInForm,
-  handleAuthChange,
-  handleSignIn,
-  handleSignUp,
   onSearch,
   searchQuery,
   setSearchQuery,
+  selectedScenario,
+  setSelectedScenario,
 }) => {
   const {
     isAuthenticated,
@@ -25,6 +19,14 @@ const NavbarWithSearch = ({
     isDropdownMenuOpen,
     toggleDropdownMenu,
     handleLogout,
+    isSignInModalOpen,
+    isSignUpModalOpen,
+    toggleSignInModal,
+    toggleSignUpModal,
+    authForm,
+    handleAuthInputChange,
+    handleSignInSubmit,
+    handleSignUpSubmit,
   } = useAuth();
 
   return (
@@ -44,6 +46,8 @@ const NavbarWithSearch = ({
           onSearch={onSearch}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          selectedScenario={selectedScenario}
+          setSelectedScenario={setSelectedScenario}
         />
         {isAuthenticated ? (
           <div className="relative inline-block">
@@ -101,29 +105,29 @@ const NavbarWithSearch = ({
               title="Sign Up for an Account"
             >
               <div className="p-4 md:p-5">
-                <form className="space-y-4" onSubmit={handleSignUp}>
+                <form className="space-y-4" onSubmit={handleSignUpSubmit}>
                   <InputField
                     label="Name"
                     name="name"
                     type="text"
-                    value={signInForm.name}
-                    onChange={handleAuthChange}
+                    value={authForm.name}
+                    onChange={handleAuthInputChange}
                     required
                   />
                   <InputField
                     label="Email"
                     name="email"
                     type="email"
-                    value={signInForm.email}
-                    onChange={handleAuthChange}
+                    value={authForm.email}
+                    onChange={handleAuthInputChange}
                     required
                   />
                   <InputField
                     label="Password"
                     name="password"
                     type="password"
-                    value={signInForm.password}
-                    onChange={handleAuthChange}
+                    value={authForm.password}
+                    onChange={handleAuthInputChange}
                     required
                   />
 
@@ -139,21 +143,21 @@ const NavbarWithSearch = ({
               title="Sign In to Your Account"
             >
               <div className="p-4 md:p-5">
-                <form className="space-y-4" onSubmit={handleSignIn}>
+                <form className="space-y-4" onSubmit={handleSignInSubmit}>
                   <InputField
                     label="Email"
                     name="email"
                     type="email"
-                    value={signInForm.email}
-                    onChange={handleAuthChange}
+                    value={authForm.email}
+                    onChange={handleAuthInputChange}
                     required
                   />
                   <InputField
                     label="Password"
                     name="password"
                     type="password"
-                    value={signInForm.password}
-                    onChange={handleAuthChange}
+                    value={authForm.password}
+                    onChange={handleAuthInputChange}
                     required
                   />
 

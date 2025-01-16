@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { getBookById, signin, signup } from "../utils/fetch";
+import { getBookById } from "../utils/fetch";
 import Footer from "../components/Footer";
 import NavbarWithSearch from "../components/NavbarWithSearch";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -10,9 +10,7 @@ import BookCard from "../components/BookCard";
 import { FiDownload, FiBookmark } from "react-icons/fi";
 import Button from "../components/Button";
 import { RANDOM_COLORS } from "../constants";
-import { useAuth } from "../context/AuthContext";
 import { getSession } from "../utils/storage";
-import Swal from "sweetalert2";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -21,19 +19,12 @@ import "swiper/css/free-mode";
 
 function BookDetail() {
   const { id } = useParams();
-  const { handleLogin, handleLogout } = useAuth();
   const [book, setBook] = useState("");
   const [relatedBooks, setRelatedBooks] = useState([]);
   const [randomColor, setRandomColor] = useState("");
   const [error, setError] = useState(null);
   const [newQuery, setNewQuery] = useState("");
-  const [isSignInModalOpen, setSignInModalOpen] = useState(false);
-  const [isSignUpModalOpen, setSignUpModalOpen] = useState(false);
-  const [authForm, setAuthForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+  const [selectedScenario, setSelectedScenario] = useState("");
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -63,52 +54,10 @@ function BookDetail() {
     }
   };
 
-  const handleAuthInputChange = (e) => {
-    const { name, value } = e.target;
-    setAuthForm((prevForm) => ({ ...prevForm, [name]: value }));
-  };
-
-  const handleSignUpSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const response = await signup(authForm);
-
-      if (response.status === "success") {
-        handleLogin(response.user, response.token);
-        setSignInModalOpen(false);
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Failed to sign up",
-        text: error.message || "Something went wrong",
-      });
-    }
-  };
-
-  const handleSignInSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const response = await signin(authForm.email, authForm.password);
-      if (response.status === "success") {
-        handleLogin(response.user, response.token);
-        setSignInModalOpen(false);
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Failed to sign in",
-        text: error.message || "Something went wrong",
-      });
-    }
-  };
-
   const handleSearch = (e) => {
     e.preventDefault();
-    if (newQuery.trim()) {
-      window.location.href = `/books?query=${newQuery}`;
+    if (newQuery.trim() && selectedScenario) {
+      window.location.href = `/books?query=${newQuery}&scenario=${selectedScenario}`;
     }
   };
 
@@ -122,18 +71,11 @@ function BookDetail() {
   return (
     <>
       <NavbarWithSearch
-        isSignInModalOpen={isSignInModalOpen}
-        isSignUpModalOpen={isSignUpModalOpen}
-        toggleSignInModal={() => setSignInModalOpen(!isSignInModalOpen)}
-        toggleSignUpModal={() => setSignUpModalOpen(!isSignUpModalOpen)}
-        signInForm={authForm}
-        handleAuthChange={handleAuthInputChange}
-        handleSignIn={handleSignInSubmit}
-        handleSignUp={handleSignUpSubmit}
-        handleLogout={handleLogout}
         onSearch={handleSearch}
         searchQuery={newQuery}
         setSearchQuery={setNewQuery}
+        selectedScenario={selectedScenario}
+        setSelectedScenario={setSelectedScenario}
       />
       {error && (
         <div

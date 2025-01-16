@@ -2,10 +2,10 @@ import axios from "axios";
 import { config } from "../configs";
 import { getItem, removeItem, setItem } from "./storage";
 
-export async function searchBooks(query, page = 1) {
+export async function searchBooks(query, scenario, page = 1) {
   try {
     const response = await axios.get(
-      `${config.api_host}/books/search?query=${query}&page=${page}`
+      `${config.api_host}/books/search?query=${query}&scenario=${scenario}&page=${page}`
     );
 
     if (response.data.status === "success") {

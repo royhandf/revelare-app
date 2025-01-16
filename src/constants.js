@@ -12,5 +12,5 @@ export const SCENARIO_OPTIONS = [
   { value: "3", label: "3 Terms TF-IDF" },
   { value: "5", label: "5 Terms TF-IDF" },
   { value: "10", label: "10 Terms TF-IDF" },
-  // { value: "0", label: "Tanpa TF-IDF" },
+  { value: "0", label: "Tanpa TF-IDF" },
 ];

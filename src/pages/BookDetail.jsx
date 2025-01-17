@@ -7,7 +7,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay, FreeMode } from "swiper/modules";
 import Breadcrumb from "../components/Breadcrumb";
 import BookCard from "../components/BookCard";
-import { FiDownload, FiBookmark } from "react-icons/fi";
+import { FiDownload } from "react-icons/fi";
 import Button from "../components/Button";
 import { RANDOM_COLORS } from "../constants";
 import { getSession } from "../utils/storage";
@@ -152,11 +152,6 @@ function BookDetail() {
               >
                 <FiDownload className="h-5 w-5" />
                 <span className="ml-2">Download</span>
-              </Button>
-
-              <Button className="w-full flex items-center justify-center mt-3 px-4 py-2 text-sm font-medium text-violet-800 bg-transparent rounded-lg border border-violet-700 hover:bg-violet-100 focus:outline-none focus:ring-violet-300">
-                <FiBookmark className="h-5 w-5" />
-                <span className="ml-2">Save</span>
               </Button>
             </div>
           </div>

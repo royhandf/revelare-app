@@ -11,6 +11,7 @@ const Dropdown = ({ onSignOut }) => {
         {currentUser && currentUser.role === "admin" && (
           <DropdownItem to="/dashboard/books">Dashboard</DropdownItem>
         )}
+        <DropdownItem to="/">Home</DropdownItem>
         <DropdownItem to="#" onClick={onSignOut}>
           Log out
         </DropdownItem>

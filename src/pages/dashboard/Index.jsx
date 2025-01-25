@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 const Index = () => {
   const { currentUser } = useAuth();
   return (
-    <div className="p-6 flex items-center justify-center">
+    <div className="p-6">
       <div className="max-w-screen-lg w-full">
         <h1 className="text-3xl font-semibold mb-4">
           Welcome back, {currentUser.name || "User"}!

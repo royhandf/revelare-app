@@ -50,7 +50,13 @@ export async function signup(data) {
       throw new Error(response.data.message || "Failed to register");
     }
   } catch (error) {
-    throw error;
+    if (error.response && error.response.data && error.response.data.error) {
+      throw new Error(error.response.data.error);
+    } else {
+      throw new Error(
+        error.message || "Something went wrong during registration"
+      );
+    }
   }
 }
 

@@ -231,3 +231,118 @@ export async function deleteBook(id) {
     throw error;
   }
 }
+
+export async function getUsers() {
+  try {
+    const token = getItem("token");
+
+    if (!token) {
+      removeItem("user");
+      removeItem("token");
+      throw new Error("Unauthorized");
+    }
+
+    const response = await axios.get(`${config.api_host}/dashboard/users`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.data.status === "success") {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to fetch users");
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function updateUser(id, data) {
+  try {
+    const token = getItem("token");
+
+    if (!token) {
+      removeItem("user");
+      removeItem("token");
+      throw new Error("Unauthorized");
+    }
+
+    const response = await axios.put(
+      `${config.api_host}/dashboard/users/edit/${id}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.data.status === "success") {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to update user");
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function deleteUser(id) {
+  try {
+    const token = getItem("token");
+
+    if (!token) {
+      removeItem("user");
+      removeItem("token");
+      throw new Error("Unauthorized");
+    }
+
+    const response = await axios.delete(
+      `${config.api_host}/dashboard/users/delete/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.data.status === "success") {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to delete user");
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getUserForEdit(id) {
+  try {
+    const token = getItem("token");
+
+    if (!token) {
+      removeItem("user");
+      removeItem("token");
+      throw new Error("Unauthorized");
+    }
+
+    const response = await axios.get(
+      `${config.api_host}/dashboard/users/edit/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.data.status === "success") {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to fetch user data");
+    }
+  } catch (error) {
+    throw error;
+  }
+}

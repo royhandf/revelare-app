@@ -2,8 +2,8 @@ import React from "react";
 
 const Breadcrumb = ({ item }) => {
   return (
-    <div className="container p-6">
-      <div className="mx-auto max-w-screen-xl">
+    <div className="container mx-auto p-6">
+      <div className="mx-auto lg:max-w-7xl sm:max-w-full">
         <nav className="flex" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 md:space-x-2">
             <li className="inline-flex items-center">

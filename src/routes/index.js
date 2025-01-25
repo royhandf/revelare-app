@@ -3,11 +3,14 @@ import Home from "../pages/Home";
 import BookLists from "../pages/BookLists";
 import BookDetail from "../pages/BookDetail";
 import Unauthorized from "../pages/error/Unauthorized";
-import Index from "../pages/dashboard/Index";
-import Create from "../pages/dashboard/Create";
-import Edit from "../pages/dashboard/Edit";
+import BookIndex from "../pages/book/Index";
+import BookCreate from "../pages/book/Create";
+import BookEdit from "../pages/book/Edit";
+import UserIndex from "../pages/user/Index";
+import UserEdit from "../pages/user/Edit";
 import NotFound from "../pages/error/NotFound";
 import DashboardLayout from "../components/DashboardLayout";
+import Index from "../pages/dashboard/Index";
 
 export function AppRoutes() {
   return (
@@ -17,10 +20,17 @@ export function AppRoutes() {
       <Route path="/books/:id" element={<BookDetail />} />
 
       <Route path="/dashboard" element={<DashboardLayout />}>
+        <Route index element={<Index />} />
+
         <Route path="books">
-          <Route index element={<Index />} />
-          <Route path="create" element={<Create />} />
-          <Route path="edit/:id" element={<Edit />} />
+          <Route index element={<BookIndex />} />
+          <Route path="create" element={<BookCreate />} />
+          <Route path="edit/:id" element={<BookEdit />} />
+        </Route>
+
+        <Route path="users">
+          <Route index element={<UserIndex />} />
+          <Route path="edit/:id" element={<UserEdit />} />
         </Route>
       </Route>
 

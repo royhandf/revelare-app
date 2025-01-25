@@ -1,6 +1,6 @@
 import { Outlet, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import Navbar from "./Navbar";
+import NavbarWithSearch from "./NavbarWithSearch";
 
 const DashboardLayout = () => {
   const { isAuthenticated } = useAuth();
@@ -11,7 +11,7 @@ const DashboardLayout = () => {
 
   return (
     <>
-      <Navbar />
+      <NavbarWithSearch />
       <main className="max-w-7xl mx-auto p-6">
         <Outlet />
       </main>

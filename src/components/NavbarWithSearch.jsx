@@ -5,6 +5,7 @@ import Button from "./Button";
 import InputField from "./InputField";
 import Dropdown from "./Dropdown";
 import { useAuth } from "../context/AuthContext";
+import { useLocation } from "react-router-dom";
 
 const NavbarWithSearch = ({
   onSearch,
@@ -29,6 +30,9 @@ const NavbarWithSearch = ({
     handleSignUpSubmit,
   } = useAuth();
 
+  const location = useLocation();
+  const isDashboardPage = location.pathname.startsWith("/dashboard");
+
   return (
     <nav className="bg-white py-4 px-6 shadow-sm">
       <div className="max-w-screen-xl flex items-center justify-between mx-auto p-2 gap-3">
@@ -42,14 +46,38 @@ const NavbarWithSearch = ({
           />
           <span className="text-2xl font-semibold">Revelare</span>
         </a>
-        <SearchBar
-          onSearch={onSearch}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          selectedScenario={selectedScenario}
-          setSelectedScenario={setSelectedScenario}
-        />
-        {isAuthenticated ? (
+        {isAuthenticated && currentUser.role === "admin" && isDashboardPage ? (
+          <div className="flex space-x-6">
+            <a
+              href="/dashboard"
+              className="text-gray-700 hover:text-violet-900"
+            >
+              Dashboard
+            </a>
+            <a
+              href="/dashboard/books"
+              className="text-gray-700 hover:text-violet-900"
+            >
+              Books
+            </a>
+            <a
+              href="/dashboard/users"
+              className="text-gray-700 hover:text-gray-900"
+            >
+              Users
+            </a>
+          </div>
+        ) : (
+          <SearchBar
+            onSearch={onSearch}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            selectedScenario={selectedScenario}
+            setSelectedScenario={setSelectedScenario}
+          />
+        )}
+
+        {isAuthenticated && currentUser ? (
           <div className="relative inline-block">
             <Button
               onClick={toggleDropdownMenu}
@@ -96,7 +124,6 @@ const NavbarWithSearch = ({
             </Button>
           </div>
         )}
-
         {!isAuthenticated && (
           <>
             <Modal

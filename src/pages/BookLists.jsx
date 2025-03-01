@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 import BookCard from "../components/BookCard";
 import Pagination from "../components/Pagination";
 import { getSession, setSession } from "../utils/storage";
+import { useAuth } from "../context/AuthContext";
 
 function BookLists() {
   const location = useLocation();
@@ -19,6 +20,7 @@ function BookLists() {
   const [newQuery, setNewQuery] = useState("");
   const [selectedScenario, setSelectedScenario] = useState("");
   const [error, setError] = useState("");
+  const { isAuthenticated, toggleSignInModal } = useAuth();
 
   useEffect(() => {
     const queryFromUrl =
@@ -79,7 +81,11 @@ function BookLists() {
   };
 
   const handleBookClick = (bookId) => {
-    window.location.href = `/books/${bookId}`;
+    if (isAuthenticated) {
+      navigate(`/books/${bookId}`);
+    } else {
+      toggleSignInModal();
+    }
   };
 
   return (

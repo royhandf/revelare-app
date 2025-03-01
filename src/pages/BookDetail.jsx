@@ -1,21 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { getBookById } from "../utils/fetch";
+import {
+  getBookById,
+  getUserBookmarks,
+  removeBookmark,
+  saveBookmark,
+} from "../utils/fetch";
 import Footer from "../components/Footer";
 import NavbarWithSearch from "../components/NavbarWithSearch";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay, FreeMode } from "swiper/modules";
 import Breadcrumb from "../components/Breadcrumb";
 import BookCard from "../components/BookCard";
-import { FiDownload } from "react-icons/fi";
+import { FiBookmark, FiDownload } from "react-icons/fi";
 import Button from "../components/Button";
 import { RANDOM_COLORS } from "../constants";
-import { getSession } from "../utils/storage";
+import { getItem, getSession } from "../utils/storage";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/autoplay";
 import "swiper/css/free-mode";
+import Swal from "sweetalert2";
 
 function BookDetail() {
   const { id } = useParams();
@@ -25,16 +31,34 @@ function BookDetail() {
   const [error, setError] = useState(null);
   const [newQuery, setNewQuery] = useState("");
   const [selectedScenario, setSelectedScenario] = useState("");
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [bookmarkId, setBookmarkId] = useState(null);
 
   useEffect(() => {
     const fetchBook = async () => {
       try {
         const result = await getBookById(id);
         setBook(result.data);
-        const savedRelatedBooks = getSession("relatedBooks");
 
-        if (Array.isArray(savedRelatedBooks))
+        const user = getItem("user");
+        if (user) {
+          const bookmarks = await getUserBookmarks(user.id);
+          const foundBookmark = bookmarks.data.find(
+            (b) => b.book_id === result.data.id && b.user_id === user.id
+          );
+          if (foundBookmark) {
+            setIsBookmarked(true);
+            setBookmarkId(foundBookmark.id); // Simpan ID bookmark
+          } else {
+            setIsBookmarked(false);
+            setBookmarkId(null);
+          }
+        }
+
+        const savedRelatedBooks = getSession("relatedBooks");
+        if (Array.isArray(savedRelatedBooks)) {
           setRelatedBooks(savedRelatedBooks);
+        }
 
         const randomColor =
           RANDOM_COLORS[Math.floor(Math.random() * RANDOM_COLORS.length)];
@@ -58,6 +82,39 @@ function BookDetail() {
     e.preventDefault();
     if (newQuery.trim() && selectedScenario) {
       window.location.href = `/books?query=${newQuery}&scenario=${selectedScenario}`;
+    }
+  };
+
+  const handleBookmark = async () => {
+    const user = getItem("user");
+
+    if (user) {
+      if (isBookmarked) {
+        // Jika sudah di bookmark, hapus bookmark
+        try {
+          await removeBookmark(bookmarkId);
+          setIsBookmarked(false);
+          setBookmarkId(null);
+        } catch (error) {
+          setError(error.message || "Failed to remove bookmark");
+        }
+      } else {
+        // Jika belum di bookmark, simpan bookmark
+        try {
+          const response = await saveBookmark(user.id, book.id);
+          if (response.status === "success") {
+            Swal.fire({
+              icon: "success",
+              title: "Success",
+              text: "Bookmark saved successfully",
+            });
+            setIsBookmarked(true);
+            setBookmarkId(response.data.id);
+          }
+        } catch (error) {
+          setError(error.message || "Failed to save bookmark");
+        }
+      }
     }
   };
 
@@ -148,10 +205,21 @@ function BookDetail() {
 
               <Button
                 onClick={handleDownload}
-                className="w-full flex items-center justify-center mt-6 mb-3 px-4 py-2 text-sm font-medium text-white bg-violet-700 rounded-lg border border-violet-700 hover:bg-violet-800 focus:outline-none focus:ring-violet-300"
+                className="w-full flex items-center justify-center mt-6 mb-3 px-4 py-2 text-sm font-medium text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-blue-300"
               >
                 <FiDownload className="h-5 w-5" />
                 <span className="ml-2">Download</span>
+              </Button>
+              <Button
+                onClick={handleBookmark}
+                className={`w-full flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg border ${
+                  isBookmarked
+                    ? "text-white bg-violet-700 border-violet-700"
+                    : "text-violet-700 border-violet-700 bg-white"
+                }`}
+              >
+                <FiBookmark className="h-5 w-5" />
+                <span className="ml-2">{isBookmarked ? "Saved" : "Save"}</span>
               </Button>
             </div>
           </div>

@@ -11,6 +11,7 @@ import UserEdit from "../pages/user/Edit";
 import NotFound from "../pages/error/NotFound";
 import DashboardLayout from "../components/DashboardLayout";
 import Index from "../pages/dashboard/Index";
+import Bookmark from "../pages/Bookmark";
 
 export function AppRoutes() {
   return (
@@ -18,6 +19,7 @@ export function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/books" element={<BookLists />} />
       <Route path="/books/:id" element={<BookDetail />} />
+      <Route path="/bookmarks" element={<Bookmark />} />
 
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<Index />} />

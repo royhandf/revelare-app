@@ -352,3 +352,88 @@ export async function getUserForEdit(id) {
     throw error;
   }
 }
+
+export const getUserBookmarks = async (userId) => {
+  try {
+    const token = getItem("token");
+
+    if (!token) {
+      removeItem("user");
+      removeItem("token");
+      throw new Error("Unauthorized");
+    }
+
+    const response = await axios.get(`${config.api_host}/bookmarks/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.data.status === "success") {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to fetch bookmarks");
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const saveBookmark = async (userId, bookId) => {
+  try {
+    const token = getItem("token");
+    if (!token) {
+      removeItem("user");
+      removeItem("token");
+      throw new Error("Unauthorized");
+    }
+
+    console.log(`Requesting: ${config.api_host}/bookmarks/add`);
+
+    const response = await axios.post(
+      `${config.api_host}/bookmarks/add`,
+      { user_id: userId, book_id: bookId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.data.status === "success") {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to add bookmark");
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const removeBookmark = async (bookmarkId) => {
+  try {
+    const token = getItem("token");
+    if (!token) {
+      removeItem("user");
+      removeItem("token");
+      throw new Error("Unauthorized");
+    }
+
+    const response = await axios.delete(
+      `${config.api_host}/bookmarks/delete/${bookmarkId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log(response.data);
+    if (response.data.status === "success") {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to remove bookmark");
+    }
+  } catch (error) {
+    throw error;
+  }
+};

@@ -12,6 +12,7 @@ const Dropdown = ({ onSignOut }) => {
           <DropdownItem to="/dashboard">Dashboard</DropdownItem>
         )}
         <DropdownItem to="/">Home</DropdownItem>
+        {currentUser && <DropdownItem to="/bookmarks">Bookmarks</DropdownItem>}
         <DropdownItem to="#" onClick={onSignOut}>
           Log out
         </DropdownItem>

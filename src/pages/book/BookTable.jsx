@@ -11,9 +11,9 @@ const BookTable = React.memo(
     const [selectedItem, setSelectedItem] = useState(null);
 
     const columnHeaders = {
-      id: "ID",
-      cover: "Cover",
-      title: "Title",
+      id: "No",
+      book: "Book",
+      // title: "Title",
       authors: "Authors",
       editors: "Editors",
       publisher: "Publisher",
@@ -42,14 +42,14 @@ const BookTable = React.memo(
                 <td className="font-medium text-gray-700">
                   {(currentPage - 1) * 10 + index + 1}
                 </td>
-                <td className="p-2">
+                <td className="p-2 flex justify-start items-center gap-2">
                   <img
                     className="h-28 w-20 max-w-20 max-h-28 object-cover rounded-lg"
                     src={item.cover_link}
                     alt={item.title}
                   />
+                  <p>{item.title}</p>
                 </td>
-                <td>{item.title}</td>
                 <td>{item.authors || "-"}</td>
                 <td>
                   {item.editors

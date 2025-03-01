@@ -7,7 +7,7 @@ import Button from "../../components/Button";
 const UserTable = React.memo(
   ({ items, currentPage, itemsPerPage, onDelete }) => {
     const columnHeaders = {
-      id: "ID",
+      id: "No",
       name: "Name",
       email: "Email",
       role: "Role",

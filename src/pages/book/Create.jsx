@@ -129,7 +129,7 @@ const Create = () => {
             <InputField
               label="ISBN"
               name="isbn"
-              type="number"
+              type="text"
               placeholder="Add ISBN here"
               value={formData.isbn}
               onChange={(e) => handleChange("isbn", e.target.value)}

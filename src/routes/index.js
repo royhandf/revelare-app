@@ -12,6 +12,9 @@ import NotFound from "../pages/error/NotFound";
 import DashboardLayout from "../components/DashboardLayout";
 import Index from "../pages/dashboard/Index";
 import Bookmark from "../pages/Bookmark";
+import CategoryIndex from "../pages/category/Index";
+import CategoryCreate from "../pages/category/Create";
+import CategoryEdit from "../pages/category/Edit";
 
 export function AppRoutes() {
   return (
@@ -24,6 +27,11 @@ export function AppRoutes() {
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<Index />} />
 
+        <Route path="categories">
+          <Route index element={<CategoryIndex />} />
+          <Route path="create" element={<CategoryCreate />} />
+          <Route path="edit/:id" element={<CategoryEdit />} />
+        </Route>
         <Route path="books">
           <Route index element={<BookIndex />} />
           <Route path="create" element={<BookCreate />} />

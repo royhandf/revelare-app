@@ -55,6 +55,12 @@ const NavbarWithSearch = ({
               Dashboard
             </a>
             <a
+              href="/dashboard/categories"
+              className="text-gray-700 hover:text-violet-900"
+            >
+              Categories
+            </a>
+            <a
               href="/dashboard/books"
               className="text-gray-700 hover:text-violet-900"
             >

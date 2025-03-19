@@ -89,6 +89,131 @@ export async function signin(email, password) {
   }
 }
 
+export async function getCategories() {
+  try {
+    const token = getItem("token");
+
+    if (!token) {
+      removeItem("user");
+      removeItem("token");
+      throw new Error("Unauthorized");
+    }
+
+    const response = await axios.get(
+      `${config.api_host}/dashboard/categories`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.data.status === "success") {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to fetch categories");
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function addCategory(category) {
+  try {
+    const token = getItem("token");
+
+    if (!token) throw new Error("Unauthorized");
+
+    const response = await axios.post(
+      `${config.api_host}/dashboard/categories/create`,
+      category,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getCategoryForEdit(id) {
+  try {
+    const token = getItem("token");
+
+    if (!token) {
+      removeItem("user");
+      removeItem("token");
+      throw new Error("Unauthorized");
+    }
+
+    const response = await axios.get(
+      `${config.api_host}/dashboard/categories/edit/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.data.status === "success") {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to fetch category data");
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function updateCategory(id, updatedData) {
+  try {
+    const token = getItem("token");
+
+    if (!token) throw new Error("Unauthorized");
+
+    const response = await axios.put(
+      `${config.api_host}/dashboard/categories/edit/${id}`,
+      updatedData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function deleteCategory(id) {
+  try {
+    const token = getItem("token");
+
+    if (!token) throw new Error("Unauthorized");
+
+    const response = await axios.delete(
+      `${config.api_host}/dashboard/categories/delete/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function getData() {
   try {
     const token = getItem("token");

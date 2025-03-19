@@ -26,13 +26,13 @@ const UserTable = React.memo(
           <tbody>
             {currentItems.map((item, index) => (
               <tr className="bg-white border-b hover:bg-gray-50" key={item.id}>
-                <td className="font-medium text-gray-700">
+                <td className="font-medium text-gray-700 px-2">
                   {(currentPage - 1) * itemsPerPage + index + 1}
                 </td>
-                <td className="p-2">{item.name}</td>
-                <td>{item.email}</td>
-                <td>{item.role}</td>
-                <td>
+                <td className="px-2 py-4">{item.name}</td>
+                <td className="px-2">{item.email}</td>
+                <td className="px-2">{item.role}</td>
+                <td className="px-2">
                   {new Date(item.created_at).toLocaleDateString("en-GB", {
                     day: "2-digit",
                     month: "short",

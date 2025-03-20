@@ -101,7 +101,6 @@ const BookTable = React.memo(
             ))}
           </tbody>
         </table>
-
         {isDetailModalOpen && selectedItem && (
           <Modal
             title={selectedItem.title}
@@ -116,12 +115,25 @@ const BookTable = React.memo(
                 </h4>
                 <p className="text-gray-600">{selectedItem.isbn}</p>
               </div>
+
+              <div className="mb-4">
+                <h4 className="text-lg font-semibold mb-2 text-gray-900">
+                  Categories
+                </h4>
+                <p className="text-gray-600">
+                  {selectedItem.categories && selectedItem.categories.length > 0
+                    ? selectedItem.categories.join(", ")
+                    : "-"}
+                </p>
+              </div>
+
               <div className="mb-4">
                 <h4 className="text-lg font-semibold mb-2 text-gray-900">
                   Description
                 </h4>
                 <p className="text-gray-600">{selectedItem.description}</p>
               </div>
+
               <div className="mb-4">
                 <h4 className="text-lg font-semibold mb-2 text-gray-900">
                   Table of Contents

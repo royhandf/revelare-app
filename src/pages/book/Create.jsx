@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import InputField from "../../components/InputField";
 import Textarea from "../../components/Textarea";
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
-import { addBook } from "../../utils/fetch";
+import { addBook, getCategories } from "../../utils/fetch";
 import Swal from "sweetalert2";
+import Select from "react-select";
 
 const Create = () => {
   const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
     authors: "",
@@ -19,7 +21,22 @@ const Create = () => {
     cover_link: null,
     description: "",
     table_of_contents: "",
+    category_ids: [],
   });
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await getCategories();
+        setCategories(
+          result.data.map((cat) => ({ value: cat.id, label: cat.name }))
+        );
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({
@@ -28,13 +45,23 @@ const Create = () => {
     }));
   };
 
+  const handleCategoryChange = (selectedOptions) => {
+    setFormData((prev) => ({
+      ...prev,
+      category_ids: selectedOptions.map((option) => option.value),
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const data = new FormData();
-
     Object.keys(formData).forEach((key) => {
-      data.append(key, formData[key]);
+      if (key === "category_ids") {
+        formData[key].forEach((id) => data.append("categories", id));
+      } else {
+        data.append(key, formData[key]);
+      }
     });
 
     try {
@@ -158,13 +185,28 @@ const Create = () => {
           </div>
 
           <div className="space-y-4">
+            {/* Select Kategori */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Categories
+              </label>
+              <Select
+                options={categories}
+                isMulti
+                className="basic-multi-select"
+                classNamePrefix="select"
+                placeholder="Select categories..."
+                onChange={handleCategoryChange}
+              />
+            </div>
+
             <Textarea
               label="Description"
               name="description"
               placeholder="Write a description here"
               value={formData.description}
               onChange={(e) => handleChange("description", e.target.value)}
-            ></Textarea>
+            />
 
             <Textarea
               label="Table of Contents"
@@ -174,7 +216,7 @@ const Create = () => {
               onChange={(e) =>
                 handleChange("table_of_contents", e.target.value)
               }
-            ></Textarea>
+            />
           </div>
         </div>
 

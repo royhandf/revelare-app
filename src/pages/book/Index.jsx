@@ -21,22 +21,28 @@ const Index = () => {
   const fetchBooks = async () => {
     try {
       const result = await getData();
+      console.log("Books Data from API:", result.data); // Debugging
+
       let filteredBooks = result.data;
 
       if (searchQuery) {
-        filteredBooks = result.data.filter(
-          (book) =>
-            (book.title?.toLowerCase() || "").includes(
-              searchQuery.toLowerCase()
-            ) ||
-            (book.author?.toLowerCase() || "").includes(
-              searchQuery.toLowerCase()
-            ) ||
-            (book.editor?.toLowerCase() || "").includes(
-              searchQuery.toLowerCase()
-            )
-        );
+        const queryLower = searchQuery.toLowerCase();
+
+        filteredBooks = result.data.filter((book) => {
+          const titleMatch = (book.title?.toLowerCase() || "").includes(
+            queryLower
+          );
+          const authorMatch = (book.author?.toLowerCase() || "").includes(
+            queryLower
+          );
+          const editorMatch = (book.editor?.toLowerCase() || "").includes(
+            queryLower
+          );
+
+          return titleMatch || authorMatch || editorMatch;
+        });
       }
+
       setBooks(filteredBooks);
       setTotalResults(filteredBooks.length);
 

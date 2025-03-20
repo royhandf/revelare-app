@@ -5,11 +5,14 @@ import Textarea from "../../components/Textarea";
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import Swal from "sweetalert2";
-import { getBookForEdit, updateBook } from "../../utils/fetch";
+import Select from "react-select";
+import { getBookForEdit, updateBook, getCategories } from "../../utils/fetch";
 
 const Edit = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+
+  const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
     authors: "",
@@ -21,22 +24,34 @@ const Edit = () => {
     cover_link: null,
     description: "",
     table_of_contents: "",
+    category_ids: [],
   });
 
   useEffect(() => {
-    const fetchBook = async () => {
+    const fetchData = async () => {
       try {
-        const result = await getBookForEdit(id);
-        if (result.status === "success") {
-          console.log(result.data);
+        const [bookResult, categoryResult] = await Promise.all([
+          getBookForEdit(id),
+          getCategories(),
+        ]);
 
-          setFormData(result.data);
+        if (bookResult.status === "success" && categoryResult.data) {
+          setCategories(
+            categoryResult.data.map((cat) => ({
+              value: cat.id,
+              label: cat.name,
+            }))
+          );
+          setFormData({
+            ...bookResult.data,
+            category_ids: bookResult.data.categories
+              .map((catName) => categories.find((c) => c.label === catName))
+              .filter(Boolean),
+          });
         } else {
           Swal.fire({
             title: "Failed!",
-            text:
-              result.message ||
-              "An error occurred while fetching the book data.",
+            text: "Error fetching data.",
             icon: "error",
             confirmButtonText: "OK",
           });
@@ -52,7 +67,7 @@ const Edit = () => {
       }
     };
 
-    fetchBook();
+    fetchData();
   }, [id]);
 
   const handleChange = (field, value) => {
@@ -62,13 +77,23 @@ const Edit = () => {
     }));
   };
 
+  const handleCategoryChange = (selectedOptions) => {
+    setFormData((prev) => ({
+      ...prev,
+      category_ids: selectedOptions,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const data = new FormData();
-
     Object.keys(formData).forEach((key) => {
-      data.append(key, formData[key]);
+      if (key === "category_ids") {
+        formData[key].forEach((cat) => data.append("categories", cat.value));
+      } else {
+        data.append(key, formData[key]);
+      }
     });
 
     try {
@@ -178,7 +203,6 @@ const Edit = () => {
               accept=".pdf"
               maxSize={50 * 1024 * 1024}
               onChange={(e) => handleChange("pdf_link", e.target.files[0])}
-              required
             />
             {formData.pdf_link && (
               <p className="text-sm text-gray-500">
@@ -201,7 +225,6 @@ const Edit = () => {
               accept="image/*"
               maxSize={2 * 1024 * 1024}
               onChange={(e) => handleChange("cover_link", e.target.files[0])}
-              required
             />
             {formData.cover_link && (
               <div className="mt-2">
@@ -216,13 +239,28 @@ const Edit = () => {
           </div>
 
           <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Categories
+              </label>
+              <Select
+                options={categories}
+                isMulti
+                className="basic-multi-select"
+                classNamePrefix="select"
+                placeholder="Select categories..."
+                onChange={handleCategoryChange}
+                value={formData.category_ids}
+              />
+            </div>
+
             <Textarea
               label="Description"
               name="description"
               placeholder="Write a description here"
               value={formData.description}
               onChange={(e) => handleChange("description", e.target.value)}
-            ></Textarea>
+            />
 
             <Textarea
               label="Table of Contents"
@@ -232,14 +270,13 @@ const Edit = () => {
               onChange={(e) =>
                 handleChange("table_of_contents", e.target.value)
               }
-            ></Textarea>
+            />
           </div>
         </div>
 
         <div className="flex justify-end space-x-4 mt-8">
           <Button
-            type="button"
-            onClick={() => navigate(-1, { state: { refresh: true } })}
+            onClick={() => navigate(-1)}
             className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
           >
             Back

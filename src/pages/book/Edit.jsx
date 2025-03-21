@@ -42,11 +42,21 @@ const Edit = () => {
               label: cat.name,
             }))
           );
+
+          const matchedCategoryIds = bookResult.data.categories
+            .map((catName) => {
+              const foundCategory = categoryResult.data.find(
+                (c) => c.name === catName
+              );
+              return foundCategory
+                ? { value: foundCategory.id, label: foundCategory.name }
+                : null;
+            })
+            .filter(Boolean);
+
           setFormData({
             ...bookResult.data,
-            category_ids: bookResult.data.categories
-              .map((catName) => categories.find((c) => c.label === catName))
-              .filter(Boolean),
+            category_ids: matchedCategoryIds,
           });
         } else {
           Swal.fire({

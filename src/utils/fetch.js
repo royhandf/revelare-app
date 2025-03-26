@@ -214,7 +214,7 @@ export async function deleteCategory(id) {
   }
 }
 
-export async function getData() {
+export async function getData(page = 1, perPage = 10, search = "") {
   try {
     const token = getItem("token");
 
@@ -224,11 +224,18 @@ export async function getData() {
       throw new Error("Unauthorized");
     }
 
-    const response = await axios.get(`${config.api_host}/dashboard/books`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get(
+      `${
+        config.api_host
+      }/dashboard/books?page=${page}&per_page=${perPage}&search=${encodeURIComponent(
+        search
+      )}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     if (response.data.status === "success") {
       return response.data;

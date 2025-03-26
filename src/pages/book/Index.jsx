@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getData, deleteBook } from "../../utils/fetch";
 import BookTable from "./BookTable";
 import { IoIosSearch } from "react-icons/io";
@@ -9,45 +9,29 @@ import debounce from "lodash.debounce";
 
 const Index = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
+  const queryParams = new URLSearchParams(location.search);
+  const initialPage = parseInt(queryParams.get("page"), 10) || 1;
+
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [books, setBooks] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const itemsPerPage = 10;
-  const totalPages = Math.max(1, Math.ceil(totalResults / itemsPerPage));
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchBooks = async () => {
     try {
-      const result = await getData();
-      console.log("Books Data from API:", result.data); // Debugging
+      const result = await getData(currentPage, itemsPerPage, searchQuery);
 
-      let filteredBooks = result.data;
+      setBooks(result.data);
+      setTotalResults(result.total_books);
+      setTotalPages(result.total_pages);
 
-      if (searchQuery) {
-        const queryLower = searchQuery.toLowerCase();
-
-        filteredBooks = result.data.filter((book) => {
-          const titleMatch = (book.title?.toLowerCase() || "").includes(
-            queryLower
-          );
-          const authorMatch = (book.author?.toLowerCase() || "").includes(
-            queryLower
-          );
-          const editorMatch = (book.editor?.toLowerCase() || "").includes(
-            queryLower
-          );
-
-          return titleMatch || authorMatch || editorMatch;
-        });
-      }
-
-      setBooks(filteredBooks);
-      setTotalResults(filteredBooks.length);
-
-      if (filteredBooks.length === 0 && currentPage > 1) {
-        setCurrentPage(1);
+      if (result.total_books > 0 && currentPage > result.total_pages) {
+        navigate(`/dashboard/books?page=1&search=${searchQuery}`);
       }
     } catch (error) {
       setError(error.message || "Failed to fetch books.");
@@ -57,9 +41,9 @@ const Index = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleSearch = useCallback(
     debounce((query) => {
-      setSearchQuery(query);
+      navigate(`/dashboard/books?page=1&search=${query}`);
     }, 300),
-    []
+    [navigate]
   );
 
   const onSearchChange = (event) => {
@@ -67,8 +51,19 @@ const Index = () => {
   };
 
   useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const page = parseInt(queryParams.get("page"), 10) || 1;
+    const search = queryParams.get("search") || "";
+
+    if (page !== currentPage) setCurrentPage(page);
+    if (search !== searchQuery) setSearchQuery(search);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
+
+  useEffect(() => {
     fetchBooks();
-    window.scrollTo(0, 0);
+
+    window.scrollTo({ bottom: 0, behavior: "smooth" });
 
     return () => {
       handleSearch.cancel();
@@ -78,8 +73,7 @@ const Index = () => {
 
   const handlePageClick = (event) => {
     const selectedPage = event.selected + 1;
-    setCurrentPage(selectedPage);
-    navigate(`/dashboard/books?page=${selectedPage}`);
+    navigate(`/dashboard/books?page=${selectedPage}&search=${searchQuery}`);
   };
 
   const handleDelete = (id) => {
@@ -99,14 +93,11 @@ const Index = () => {
 
           if (result.status === "success") {
             Swal.fire("Deleted!", "The book has been deleted.", "success");
-            const updatedBooks = books.filter((book) => book.id !== id);
-            setBooks(updatedBooks);
+            setBooks((prevBooks) => prevBooks.filter((book) => book.id !== id));
           }
         } catch (error) {
           Swal.fire("Failed!", error.message, "error");
         }
-
-        window.location.reload();
       }
     });
   };
@@ -151,7 +142,6 @@ const Index = () => {
           <BookTable
             items={books}
             currentPage={currentPage}
-            itemsPerPage={itemsPerPage}
             onDelete={handleDelete}
           />
 
